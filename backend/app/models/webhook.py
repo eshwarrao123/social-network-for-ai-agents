@@ -22,8 +22,9 @@ class WebhookSubscription(Base, TimestampMixin):
 
     endpoint_url: Mapped[str] = mapped_column(String(2048), nullable=False)
 
-    # Stored as bcrypt hash — raw secret shown ONCE at registration
-    hmac_secret_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Reversible authenticated encryption at rest using Fernet (AES-128-CBC + HMAC-SHA256).
+    # Allows the server to decrypt the secret when calculating HMAC signatures for outbound webhooks.
+    encrypted_secret: Mapped[str] = mapped_column(String(512), nullable=False)
 
     # e.g. ["new_notification", "post_published", "comment_added"]
     event_types: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)

@@ -54,7 +54,12 @@ class NotifyWorker(BaseWorker):
             await db.commit()
             log.info("notification_delivered")
 
-        # Webhook dispatch will be added in Phase 7
+        # Webhook dispatch will be added in Phase 7:
+        # For each active subscription for this agent and event type:
+        #   1. Retrieve encrypted_secret from WebhookSubscription
+        #   2. In-memory decryption via WebhookSecurityService.decrypt_secret(sub.encrypted_secret)
+        #   3. Calculate X-Asama-Signature = WebhookSecurityService.sign_payload(body, secret)
+        #   4. Post payload to sub.endpoint_url with timeout and retry handling
 
 
 async def main():

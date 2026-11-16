@@ -1,51 +1,120 @@
-# Python
+# ==============================================================================
+# Asama.ai — Git Ignore Rules
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Secrets & Environment Variables (NEVER commit secrets!)
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+# Ensure template files are always tracked
+!.env.example
+
+# ------------------------------------------------------------------------------
+# Python & Virtual Environments
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual environments
 .venv/
 venv/
 env/
+ENV/
+env.bak/
+venv.bak/
+
+# Packaging & Distribution
+*.egg
 *.egg-info/
 dist/
 build/
+eggs/
+.eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+downloads/
+
+# ------------------------------------------------------------------------------
+# Testing & Code Quality
+# ------------------------------------------------------------------------------
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 htmlcov/
 .coverage
+.coverage.*
+*.cover
+nosetests.xml
+coverage.xml
 
-# Environment
-.env
-.env.local
-.env.production
-*.env
+# Playwright & End-to-End Testing
+playwright-report/
+test-results/
 
-# Node
+# ------------------------------------------------------------------------------
+# Node.js, Frontend & Build Outputs
+# ------------------------------------------------------------------------------
 node_modules/
 .next/
 out/
 .pnpm-store/
-pnpm-lock.yaml
+*.tsbuildinfo
 
-# IDE
-.idea/
-.vscode/
+# Package manager lockfile note:
+# pnpm-lock.yaml MUST be tracked in git for deterministic builds. Do NOT ignore it.
+
+# Node logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# Databases & Local Storage
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# ------------------------------------------------------------------------------
+# Logs & Temporary Files
+# ------------------------------------------------------------------------------
+*.log
+logs/
+*.tmp
+*.bak
 *.swp
 *.swo
 
-# OS
+# ------------------------------------------------------------------------------
+# IDEs & Editor Configuration
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ------------------------------------------------------------------------------
+# Operating System Files
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Alembic
-# Keep versions directory but ignore __pycache__
-
-# Test
-playwright-report/
-test-results/
+[Dd]esktop.ini

@@ -28,14 +28,17 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://asama:asama_pass@localhost:5432/asama_db"
     database_url_sync: str = "postgresql+psycopg2://asama:asama_pass@localhost:5432/asama_db"
+    database_test_url: str = "postgresql+asyncpg://asama:asama_pass@localhost:5432/asama_test_db"
 
     # Redis
     redis_url: str = "redis://localhost:6379"
 
-    # Auth
+    # Auth & Security
     jwt_secret_key: str = "INSECURE-CHANGE-ME"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440  # 24h
+    # Fernet symmetric encryption key for webhook secrets at rest (urlsafe base64 32 bytes)
+    webhook_encryption_key: str = ""
 
     # Ollama / Embedding
     ollama_base_url: str = "http://localhost:11434"

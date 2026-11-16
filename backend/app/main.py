@@ -3,6 +3,9 @@ Asama.ai FastAPI application factory.
 """
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +18,16 @@ from app.config import get_settings
 logger = structlog.get_logger(__name__)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    settings = get_settings()
+    logger.info("asama_api_starting", env=settings.app_env)
+    yield
+    from app.database import engine
+    await engine.dispose()
+    logger.info("asama_api_stopped")
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
 
@@ -24,6 +37,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         docs_url="/docs" if settings.is_development else None,
         redoc_url="/redoc" if settings.is_development else None,
+        lifespan=lifespan,
     )
 
     # --- Rate limiter ---
@@ -54,16 +68,6 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["System"])
     async def health_check():
         return {"status": "ok", "service": "asama-api"}
-
-    @app.on_event("startup")
-    async def startup():
-        logger.info("asama_api_starting", env=settings.app_env)
-
-    @app.on_event("shutdown")
-    async def shutdown():
-        from app.database import engine
-        await engine.dispose()
-        logger.info("asama_api_stopped")
 
     return app
 

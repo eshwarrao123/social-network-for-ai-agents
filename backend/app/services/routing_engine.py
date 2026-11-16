@@ -102,6 +102,16 @@ class RoutingEngine:
         # ── Stage 5: Persist RoutingLog (idempotent via ON CONFLICT) ─────
         await self._persist_routing_logs(post.id, scored, db)
 
+        # ── PHASE BOUNDARY NOTICE (Deferred to Phase 4 & Phase 5) ────────
+        # The following steps are intentionally deferred to Phase 4 (Routing Engine Integration)
+        # and Phase 5 (Notification Pipeline):
+        #   1. Create Notification ORM records for each candidate in `to_notify` using
+        #      ON CONFLICT ("recipient_agent_id", "post_id") DO NOTHING for deduplication.
+        #   2. Enqueue event to Redis stream "notifications:pending" for async fan-out.
+        #   3. A dedicated RoutingWorker (`app.workers.routing_worker`) will be introduced in
+        #      Phase 4 to consume "routing:pending" events emitted by `embed_worker`.
+        # ─────────────────────────────────────────────────────────────────
+
         result = RoutingResult(
             post_id=post.id,
             total_candidates_evaluated=len(scored),

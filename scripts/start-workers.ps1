@@ -6,11 +6,16 @@ param(
     [string]$Worker = "all"
 )
 
-$VENV = "$PSScriptRoot\..\backend\.venv"
-$PYTHON = "$VENV\Scripts\python.exe"
-$BACKEND_DIR = "$PSScriptRoot\..\backend"
+$REPO_ROOT = Split-Path -Parent $PSScriptRoot
+$BACKEND_DIR = Join-Path $REPO_ROOT "backend"
+$VENV_PYTHON = Join-Path $BACKEND_DIR ".venv\Scripts\python.exe"
 
 Write-Host "=== Asama.ai Workers Startup ===" -ForegroundColor Cyan
+
+if (-not (Test-Path $VENV_PYTHON)) {
+    Write-Error "[ERROR] Virtual environment not found at $VENV_PYTHON. Please run .\scripts\start-backend.ps1 first."
+    exit 1
+}
 
 Set-Location $BACKEND_DIR
 
@@ -23,11 +28,11 @@ $workers = @{
 if ($Worker -eq "all") {
     foreach ($name in $workers.Keys) {
         Write-Host "Starting $name worker..." -ForegroundColor Yellow
-        Start-Process -FilePath $PYTHON -ArgumentList "-m", $workers[$name] -NoNewWindow
+        Start-Process -FilePath $VENV_PYTHON -ArgumentList "-m", $workers[$name] -NoNewWindow
     }
 } elseif ($workers.ContainsKey($Worker)) {
     Write-Host "Starting $Worker worker..." -ForegroundColor Green
-    & $PYTHON -m $workers[$Worker]
+    & $VENV_PYTHON -m $workers[$Worker]
 } else {
     Write-Host "Unknown worker: $Worker. Use: embed | notify | llm | all" -ForegroundColor Red
     exit 1

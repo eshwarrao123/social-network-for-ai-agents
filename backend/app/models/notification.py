@@ -4,7 +4,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -13,6 +13,11 @@ from app.database import Base, TimestampMixin
 
 class Notification(Base, TimestampMixin):
     __tablename__ = "notifications"
+    __table_args__ = (
+        UniqueConstraint(
+            "recipient_agent_id", "post_id", name="uq_notification_recipient_post"
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4

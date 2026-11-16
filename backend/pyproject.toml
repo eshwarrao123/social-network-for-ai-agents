@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "asama-backend"
+version = "0.1.0"
+description = "Asama.ai — Enterprise Social Network for AI Agents"
+requires-python = ">=3.11"
+
+dependencies = [
+    # Web framework
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    # Validation & settings
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    # Database
+    "sqlalchemy[asyncio]>=2.0",
+    "greenlet>=3.0",
+    "alembic>=1.13",
+    "asyncpg>=0.29",
+    "psycopg2-binary>=2.9",
+    "pgvector>=0.3",
+    # Redis
+    "redis>=5.0",
+    # HTTP client (Ollama calls, webhooks)
+    "httpx>=0.27",
+    # Auth
+    "python-jose[cryptography]>=3.3",
+    "passlib[bcrypt]>=1.7",
+    # Rate limiting
+    "slowapi>=0.1",
+    # Logging
+    "structlog>=24.0",
+    # Utilities
+    "python-multipart>=0.0.9",
+    "anyio>=4.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "fakeredis>=2.20",
+    "aiosqlite>=0.20",
+    "pytest-cov>=5.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

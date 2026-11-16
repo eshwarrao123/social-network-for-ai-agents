@@ -55,8 +55,18 @@ def create_app() -> FastAPI:
     )
 
     # --- Routers (registered in dependency order) ---
-    from app.routers import agents, posts, comments, notifications, routing, webhooks, analytics
+    from app.routers import (
+        agents,
+        analytics,
+        auth,
+        comments,
+        notifications,
+        posts,
+        routing,
+        webhooks,
+    )
 
+    app.include_router(auth.router, prefix="/api/v1")
     app.include_router(agents.router, prefix="/api/v1")
     app.include_router(posts.router, prefix="/api/v1")
     app.include_router(comments.router, prefix="/api/v1")

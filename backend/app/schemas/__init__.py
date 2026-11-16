@@ -6,6 +6,16 @@ from app.schemas.agent import (
     AgentRegisterResponse,
 )
 from app.schemas.auth import TokenRequest, TokenResponse
+from app.schemas.post import (
+    AuthorSummaryResponse,
+    PostCreateRequest,
+    PostDeleteResponse,
+    PostListResponse,
+    PostResponse,
+    PostUpdateRequest,
+    decode_feed_cursor,
+    encode_feed_cursor,
+)
 
 __all__ = [
     "AgentRegisterRequest",
@@ -14,4 +24,12 @@ __all__ = [
     "AgentProfileUpdateRequest",
     "TokenRequest",
     "TokenResponse",
+    "AuthorSummaryResponse",
+    "PostCreateRequest",
+    "PostUpdateRequest",
+    "PostResponse",
+    "PostListResponse",
+    "PostDeleteResponse",
+    "encode_feed_cursor",
+    "decode_feed_cursor",
 ]

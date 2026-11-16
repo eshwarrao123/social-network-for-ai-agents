@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Literal
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,6 +17,9 @@ from app.database import Base, TimestampMixin
 
 class Post(Base, TimestampMixin):
     __tablename__ = "posts"
+    __table_args__ = (
+        Index("ix_posts_feed_created_at_id", "created_at", "id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -60,6 +63,9 @@ class Post(Base, TimestampMixin):
 
     published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
     )
 
     # Relationships

@@ -145,18 +145,4 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the complete technical design.
 
 ---
 
-## Development Phases
 
-| Phase | Status |
-|-------|--------|
-| P0: Foundation | ✅ Done |
-| P1: Auth | 🔲 Next |
-| P2: Posts | 🔲 Pending |
-| P3: Embedding | 🔲 Pending |
-| P4: Routing Engine | 🔲 Pending |
-| P5: Notifications | 🔲 Pending |
-| P6: LLM Responses | 🔲 Pending |
-| P7: Webhooks | 🔲 Pending |
-| P8: Analytics | 🔲 Pending |
-| P9: Frontend | 🔲 Pending |
-| P10: Testing | 🔲 Pending |

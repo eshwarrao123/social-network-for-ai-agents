@@ -29,6 +29,7 @@ from typing import Any
 
 import structlog
 from jose import JWTError, jwt
+from jose.exceptions import ExpiredSignatureError, JWTClaimsError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,6 +55,14 @@ class TokenExpiredError(AuthError):
 
 class InvalidTokenError(AuthError):
     """Raised when a JWT access token is malformed or invalid."""
+
+
+class InvalidIssuerError(InvalidTokenError):
+    """Raised when the token issuer claim does not match configured issuer."""
+
+
+class InvalidAudienceError(InvalidTokenError):
+    """Raised when the token audience claim does not match configured audience."""
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,7 +132,10 @@ async def authenticate_agent_by_api_key(
 # JWT Token Management
 # ─────────────────────────────────────────────────────────────────────────────
 
-def create_access_token(agent: Agent) -> tuple[str, int]:
+def create_access_token(
+    agent: Agent,
+    expire_minutes: int | None = None,
+) -> tuple[str, int]:
     """
     Generates a signed JWT Bearer access token for an authenticated agent.
     
@@ -132,7 +144,8 @@ def create_access_token(agent: Agent) -> tuple[str, int]:
     """
     settings = get_settings()
     now = datetime.now(timezone.utc)
-    expires_delta = timedelta(minutes=settings.jwt_expire_minutes)
+    effective_minutes = expire_minutes if expire_minutes is not None else settings.token_expire_minutes
+    expires_delta = timedelta(minutes=effective_minutes)
     expire_time = now + expires_delta
     expires_in_seconds = int(expires_delta.total_seconds())
 
@@ -141,8 +154,8 @@ def create_access_token(agent: Agent) -> tuple[str, int]:
         "agent_id": str(agent.id),
         "name": agent.name,
         "company": agent.company,
-        "iss": JWT_ISSUER,
-        "aud": JWT_AUDIENCE,
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
         "iat": int(now.timestamp()),
         "exp": int(expire_time.timestamp()),
         "jti": str(uuid.uuid4()),
@@ -159,7 +172,7 @@ def create_access_token(agent: Agent) -> tuple[str, int]:
 def decode_access_token(token: str) -> dict[str, Any]:
     """
     Decodes and validates a JWT Bearer access token.
-    Enforces strict signature verification, expiration, and claims checks.
+    Enforces strict signature verification, expiration, issuer, audience, and algorithm.
     """
     settings = get_settings()
     try:
@@ -167,8 +180,8 @@ def decode_access_token(token: str) -> dict[str, Any]:
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
-            audience=JWT_AUDIENCE,
-            issuer=JWT_ISSUER,
+            audience=settings.jwt_audience,
+            issuer=settings.jwt_issuer,
             options={
                 "verify_signature": True,
                 "verify_exp": True,
@@ -182,8 +195,15 @@ def decode_access_token(token: str) -> dict[str, Any]:
             raise InvalidTokenError("Missing subject (sub) claim in token")
         return payload
 
-    except jwt.ExpiredSignatureError as exc:
+    except ExpiredSignatureError as exc:
         raise TokenExpiredError("Access token signature has expired") from exc
+    except JWTClaimsError as exc:
+        err_msg = str(exc).lower()
+        if "issuer" in err_msg:
+            raise InvalidIssuerError(f"Token issuer validation failed: {exc}") from exc
+        if "audience" in err_msg:
+            raise InvalidAudienceError(f"Token audience validation failed: {exc}") from exc
+        raise InvalidTokenError(f"Token claims validation failed: {exc}") from exc
     except JWTError as exc:
         raise InvalidTokenError(f"Token validation failed: {exc}") from exc
 

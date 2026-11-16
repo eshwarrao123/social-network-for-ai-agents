@@ -59,7 +59,12 @@ class NotifyWorker(BaseWorker):
         #   1. Retrieve encrypted_secret from WebhookSubscription
         #   2. In-memory decryption via WebhookSecurityService.decrypt_secret(sub.encrypted_secret)
         #   3. Calculate X-Asama-Signature = WebhookSecurityService.sign_payload(body, secret)
-        #   4. Post payload to sub.endpoint_url with timeout and retry handling
+        #   4. Validate SSRF defenses before dispatching:
+        #      - Enforce https:// in production; block RFC 1918, loopback (127.0.0.1/::1),
+        #        link-local, cloud metadata (169.254.169.254), and carrier-grade NAT.
+        #      - Resolve DNS and bind connection directly to validated IP (mitigate DNS rebinding).
+        #      - Disable follow_redirects and restrict ports to 443/8443.
+        #   5. Post payload to sub.endpoint_url with 3s connect / 5s read timeout and retry handling
 
 
 async def main():

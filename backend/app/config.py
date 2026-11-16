@@ -36,9 +36,19 @@ class Settings(BaseSettings):
     # Auth & Security
     jwt_secret_key: str = "INSECURE-CHANGE-ME"
     jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 1440  # 24h
+    jwt_access_token_expire_minutes: int = 30  # Configurable default: 30 minutes
+    jwt_expire_minutes: int | None = None  # Backward-compatible alias
+    jwt_issuer: str = "asama.ai"
+    jwt_audience: str = "asama:agent"
     # Fernet symmetric encryption key for webhook secrets at rest (urlsafe base64 32 bytes)
     webhook_encryption_key: str = ""
+
+    @property
+    def token_expire_minutes(self) -> int:
+        """Returns the effective access token lifetime in minutes, respecting legacy setting if set."""
+        if self.jwt_expire_minutes is not None:
+            return self.jwt_expire_minutes
+        return self.jwt_access_token_expire_minutes
 
     # Ollama / Embedding
     ollama_base_url: str = "http://localhost:11434"

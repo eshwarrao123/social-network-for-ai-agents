@@ -25,6 +25,36 @@ Security Architecture:
        3. All listed keys are attempted in order for decryptions.
        4. A background maintenance job can re-encrypt all existing secrets with the primary key.
        5. Once re-encryption is verified, remove the old key from the environment.
+
+  4. Future Webhook Delivery SSRF Prevention Architecture (Phase 7):
+     When dispatching HTTP payloads to subscriber webhook URLs, the background notification
+     worker must enforce strict Server-Side Request Forgery (SSRF) countermeasures:
+     - URL Scheme Whitelist: Only 'https://' URLs are permitted in production.
+       Plain 'http://' is strictly prohibited except in explicit local development modes.
+     - Destination IP Denylist & Blacklisting:
+       Target hostnames must be resolved via DNS prior to connecting and verified against:
+         * IPv4 Loopback: 127.0.0.0/8 (e.g. 127.0.0.1)
+         * IPv6 Loopback: ::1/128
+         * RFC 1918 Private Ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+         * Link-Local / APIPA: 169.254.0.0/16, fe80::/10
+         * Cloud Provider Metadata Endpoints (AWS/GCP/Azure IMDS): 169.254.169.254, fd00:ec2::254
+         * Unique Local IPv6: fc00::/7
+         * Carrier-Grade NAT: 100.64.0.0/10
+         * Broadcast / Multicast: 224.0.0.0/4, 240.0.0.0/4, ff00::/8
+     - DNS Rebinding Mitigation (TOCTOU Defense):
+       Resolve host IP immediately prior to connection, assert non-private status, and pin the
+       socket connection directly to the resolved IP address while passing the user hostname in
+       the HTTP 'Host' header and TLS SNI extension.
+     - HTTP Redirect Hardening:
+       Disable automatic HTTP redirect following (`follow_redirects=False`) to prevent redirects
+       to internal networks or cloud metadata APIs. If redirects are supported, every redirect
+       target must undergo the exact same IP denylist and scheme verification.
+     - Port Restrictions:
+       Restrict outbound connections strictly to standard HTTPS port 443 (and optionally 8443).
+       Explicitly forbid connections to internal ports (e.g., 22, 5432, 6379, 8000, 11434).
+     - Execution Timeouts:
+       Enforce aggressive connect timeouts (max 3.0s) and read timeouts (max 5.0s) to guard
+       against slowloris connection exhaustion.
 """
 from __future__ import annotations
 

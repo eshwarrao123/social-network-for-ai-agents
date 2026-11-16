@@ -37,6 +37,8 @@ from app.schemas.agent import (
 from app.schemas.auth import TokenRequest
 from app.services.auth import (
     API_KEY_LIVE_PREFIX,
+    InvalidAudienceError,
+    InvalidIssuerError,
     InvalidTokenError,
     TokenExpiredError,
     create_access_token,
@@ -163,7 +165,7 @@ def test_api_key_verification_tampered():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5, 7, 8, 9: JWT Token Lifecycle
+# 5, 7, 8, 9: JWT Token Lifecycle & Security Hardening
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
@@ -175,7 +177,8 @@ def test_jwt_token_generation_and_verification():
 
     token, expires_in = create_access_token(mock_agent)
     assert isinstance(token, str)
-    assert expires_in > 0
+    # Default configured lifetime is 30 minutes (1800 seconds)
+    assert expires_in == 1800
 
     claims = decode_access_token(token)
     assert claims["sub"] == str(mock_agent.id)
@@ -183,7 +186,93 @@ def test_jwt_token_generation_and_verification():
     assert claims["company"] == "Meridian Capital"
     assert claims["iss"] == "asama.ai"
     assert claims["aud"] == "asama:agent"
-    assert claims["exp"] > claims["iat"]
+    assert claims["exp"] - claims["iat"] == 1800
+
+
+@pytest.mark.unit
+def test_jwt_token_custom_expiration():
+    mock_agent = MagicMock(spec=Agent)
+    mock_agent.id = uuid.uuid4()
+    mock_agent.name = "CustomExpireBot"
+    mock_agent.company = "Alpha Dynamics"
+
+    # Custom 15-minute token (900 seconds)
+    token, expires_in = create_access_token(mock_agent, expire_minutes=15)
+    assert expires_in == 900
+
+    claims = decode_access_token(token)
+    assert claims["exp"] - claims["iat"] == 900
+
+
+@pytest.mark.unit
+def test_jwt_token_wrong_issuer_rejection():
+    from jose import jwt
+    from app.config import get_settings
+
+    settings = get_settings()
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "name": "SpoofedIssuerBot",
+        "iss": "untrusted-issuer.org",  # Incorrect issuer
+        "aud": settings.jwt_audience,
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+    }
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+    # Must raise InvalidIssuerError, which subclasses InvalidTokenError
+    with pytest.raises(InvalidIssuerError) as exc_info:
+        decode_access_token(token)
+
+    assert "issuer" in str(exc_info.value).lower()
+    assert issubclass(InvalidIssuerError, InvalidTokenError)
+
+
+@pytest.mark.unit
+def test_jwt_token_wrong_audience_rejection():
+    from jose import jwt
+    from app.config import get_settings
+
+    settings = get_settings()
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "name": "WrongAudienceBot",
+        "iss": settings.jwt_issuer,
+        "aud": "wrong:audience:target",  # Incorrect audience
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+    }
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+    # Must raise InvalidAudienceError, which subclasses InvalidTokenError
+    with pytest.raises(InvalidAudienceError) as exc_info:
+        decode_access_token(token)
+
+    assert "audience" in str(exc_info.value).lower()
+    assert issubclass(InvalidAudienceError, InvalidTokenError)
+
+
+@pytest.mark.unit
+def test_jwt_token_wrong_signature_key_rejection():
+    from jose import jwt
+    from app.config import get_settings
+
+    settings = get_settings()
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "name": "WrongKeyBot",
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+    }
+    wrong_secret = "tampered-secret-key-different-from-settings"
+    token = jwt.encode(claims, wrong_secret, algorithm=settings.jwt_algorithm)
+
+    with pytest.raises(InvalidTokenError) as exc_info:
+        decode_access_token(token)
+
+    assert "validation failed" in str(exc_info.value).lower()
 
 
 @pytest.mark.unit
@@ -196,8 +285,8 @@ def test_expired_jwt_token_rejection():
     claims = {
         "sub": str(uuid.uuid4()),
         "name": "OldBot",
-        "iss": "asama.ai",
-        "aud": "asama:agent",
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
         "iat": int((expired_time - timedelta(minutes=10)).timestamp()),
         "exp": int(expired_time.timestamp()),
     }
@@ -224,8 +313,8 @@ def test_jwt_token_missing_subject_rejection():
     settings = get_settings()
     claims = {
         "name": "NoSubBot",
-        "iss": "asama.ai",
-        "aud": "asama:agent",
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
         "iat": int(datetime.now(timezone.utc).timestamp()),
         "exp": int((datetime.now(timezone.utc) + timedelta(minutes=10)).timestamp()),
     }

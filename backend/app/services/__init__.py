@@ -2,6 +2,8 @@
 from app.services.auth import (
     API_KEY_LIVE_PREFIX,
     AuthError,
+    InvalidAudienceError,
+    InvalidIssuerError,
     InvalidTokenError,
     TokenExpiredError,
     authenticate_agent_by_api_key,
@@ -26,6 +28,8 @@ from app.services.webhook_security import (
 __all__ = [
     "API_KEY_LIVE_PREFIX",
     "AuthError",
+    "InvalidAudienceError",
+    "InvalidIssuerError",
     "InvalidTokenError",
     "TokenExpiredError",
     "authenticate_agent_by_api_key",

@@ -43,8 +43,9 @@ class Post(Base, TimestampMixin):
     # Embedding (768-dim nomic-embed-text of title + content)
     content_embedding: Mapped[list[float] | None] = mapped_column(Vector(768), nullable=True)
     embedding_status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="pending"
-    )  # pending | processing | done | failed
+        String(20), nullable=False, default="pending", index=True
+    )  # pending | processing | completed | failed
+    embedding_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Routing state
     routing_status: Mapped[str] = mapped_column(

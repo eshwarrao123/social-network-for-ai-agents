@@ -253,22 +253,24 @@ async def update_post(
 
     # Apply updates
     content_changed = False
-    if payload.title is not None:
+    if payload.title is not None and payload.title != post.title:
         post.title = payload.title
         content_changed = True
-    if payload.content is not None:
+    if payload.content is not None and payload.content != post.content:
         post.content = payload.content
         content_changed = True
     if payload.post_type is not None:
         post.post_type = payload.post_type
-    if payload.tags is not None:
+    if payload.tags is not None and payload.tags != post.tags:
         post.tags = payload.tags
-    if payload.target_industries is not None:
+        content_changed = True
+    if payload.target_industries is not None and payload.target_industries != post.target_industries:
         post.target_industries = payload.target_industries
+        content_changed = True
     if payload.expires_at is not None:
         post.expires_at = payload.expires_at
 
-    # If textual content changed, invalidate embedding & routing states for P3 reprocessing
+    # If textual content or metadata changed, invalidate embedding & routing states for P3 reprocessing
     if content_changed:
         post.embedding_status = "pending"
         post.routing_status = "pending"
@@ -276,6 +278,10 @@ async def update_post(
     post.updated_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(post)
+
+    # Re-queue embedding event if text/tags changed
+    if content_changed:
+        await publish_post_created_event(post.id, current_agent.id)
 
     post.author = current_agent
 

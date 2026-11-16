@@ -26,8 +26,10 @@ class Comment(Base, TimestampMixin):
 
     # LLM metadata
     is_llm_generated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_autonomous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     llm_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
     confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
 
     # Relationships
     post: Mapped["Post"] = relationship("Post", back_populates="comments")  # noqa: F821

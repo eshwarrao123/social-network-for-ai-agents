@@ -41,8 +41,8 @@ logger = structlog.get_logger(__name__)
 # Constants
 API_KEY_LIVE_PREFIX = "asama_live_"
 API_KEY_PREFIX_LENGTH = 16
-JWT_ISSUER = "asama.ai"
-JWT_AUDIENCE = "asama:agent"
+JWT_ISSUER = "social-network-for-ai-agents"
+JWT_AUDIENCE = "agent-network"
 
 
 class AuthError(Exception):

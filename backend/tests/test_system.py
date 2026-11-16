@@ -16,6 +16,9 @@ from app.models import (
     Engagement,
     RoutingLog,
     WebhookSubscription,
+    AgentInteraction,
+    AgentPreference,
+    FeedbackLedger,
 )
 
 
@@ -46,6 +49,9 @@ def test_all_orm_models_registered():
         Engagement,
         RoutingLog,
         WebhookSubscription,
+        AgentInteraction,
+        AgentPreference,
+        FeedbackLedger,
     ]
     table_names = {m.__tablename__ for m in models}
     expected = {
@@ -56,5 +62,8 @@ def test_all_orm_models_registered():
         "engagements",
         "routing_logs",
         "webhook_subscriptions",
+        "agent_interactions",
+        "agent_preferences",
+        "feedback_ledger",
     }
     assert table_names == expected

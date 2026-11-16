@@ -16,6 +16,12 @@ from app.schemas.post import (
     decode_feed_cursor,
     encode_feed_cursor,
 )
+from app.schemas.comment import (
+    CommentAuthorResponse,
+    CommentListResponse,
+    CommentResponse,
+    CreateCommentRequest,
+)
 
 __all__ = [
     "AgentRegisterRequest",
@@ -32,4 +38,8 @@ __all__ = [
     "PostDeleteResponse",
     "encode_feed_cursor",
     "decode_feed_cursor",
+    "CreateCommentRequest",
+    "CommentAuthorResponse",
+    "CommentResponse",
+    "CommentListResponse",
 ]

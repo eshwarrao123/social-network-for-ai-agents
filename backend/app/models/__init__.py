@@ -6,6 +6,8 @@ from app.models.notification import Notification
 from app.models.engagement import Engagement
 from app.models.routing_log import RoutingLog
 from app.models.webhook import WebhookSubscription
+from app.models.interaction import AgentInteraction
+from app.models.preference import AgentPreference, FeedbackLedger
 
 __all__ = [
     "Agent",
@@ -15,4 +17,7 @@ __all__ = [
     "Engagement",
     "RoutingLog",
     "WebhookSubscription",
+    "AgentInteraction",
+    "AgentPreference",
+    "FeedbackLedger",
 ]

@@ -13,8 +13,10 @@ Security Architecture:
        and is NEVER persisted to the database or exposed via APIs.
 
   2. Outbound request signing:
-     - Outbound webhook HTTP requests include the `X-Asama-Signature` header.
-     - Signature format: `sha256=<hex_digest>` computed using HMAC-SHA256 over the raw request body.
+     - Outbound webhook HTTP requests include the `X-Agent-Network-Signature` header.
+     - Signature format: `sha256=<hex_digest>` computed using HMAC-SHA256 over:
+       timestamp + "." + raw_request_body_bytes
+     - Cryptographically binds the `X-Agent-Network-Timestamp` to the body payload.
      - Timing attacks are mitigated using constant-time comparison (`hmac.compare_digest`).
 
   3. Key Management & Rotation:
@@ -61,6 +63,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+from datetime import datetime, timezone
 from typing import Sequence
 
 import structlog
@@ -161,9 +164,16 @@ class WebhookSecurityService:
                 "Failed to decrypt webhook secret. The master encryption key may have changed."
             ) from exc
 
-    def sign_payload(self, payload: bytes | str, secret: str) -> str:
+    def sign_payload(
+        self,
+        payload: bytes | str,
+        secret: str,
+        timestamp: str | int | float | None = None,
+    ) -> str:
         """
         Computes HMAC-SHA256 signature for an outbound webhook payload.
+        When timestamp is provided, canonical construction cryptographically binds the timestamp:
+            HMAC-SHA256(secret, timestamp + "." + raw_payload_bytes)
         Returns format: 'sha256=<hex_digest>'
         """
         if isinstance(payload, str):
@@ -171,31 +181,143 @@ class WebhookSecurityService:
         else:
             payload_bytes = payload
 
+        if timestamp is not None:
+            ts_bytes = str(timestamp).encode("utf-8")
+            to_sign = ts_bytes + b"." + payload_bytes
+        else:
+            to_sign = payload_bytes
+
         secret_bytes = secret.encode("utf-8")
-        digest = hmac.new(secret_bytes, payload_bytes, hashlib.sha256).hexdigest()
+        digest = hmac.new(secret_bytes, to_sign, hashlib.sha256).hexdigest()
         return f"sha256={digest}"
+
+    def parse_timestamp(self, timestamp: str | int | float) -> float | None:
+        """
+        Parses an ISO 8601 UTC string or unix epoch number into an epoch timestamp (seconds).
+        Returns None if parsing fails.
+        """
+        if isinstance(timestamp, (int, float)):
+            return float(timestamp)
+        if isinstance(timestamp, str):
+            ts_str = timestamp.strip()
+            try:
+                return float(ts_str)
+            except ValueError:
+                pass
+            try:
+                normalized = ts_str.replace("Z", "+00:00")
+                dt = datetime.fromisoformat(normalized)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.timestamp()
+            except Exception:
+                return None
+        return None
 
     def verify_signature(
         self,
         payload: bytes | str,
         secret: str,
         received_signature: str,
+        timestamp: str | int | float | None = None,
+        tolerance_seconds: float = 300.0,
+        current_time: datetime | float | None = None,
+        allow_future_seconds: float = 30.0,
     ) -> bool:
         """
-        Verifies received webhook signature using constant-time comparison to prevent timing attacks.
-        Accepts signature formats: 'sha256=<hex_digest>' or bare '<hex_digest>'.
+        Verifies received webhook signature using constant-time comparison.
+        If timestamp is provided, enforces:
+          1. Timestamp freshness validation against tolerance_seconds (default: 300s / 5min).
+          2. Rejection of future-dated deliveries beyond allow_future_seconds (default: 30s clock skew).
+          3. Cryptographic binding: signature must match HMAC-SHA256(secret, timestamp + "." + raw_body).
         """
         if not received_signature:
             return False
 
-        expected = self.sign_payload(payload, secret)
+        if timestamp is not None:
+            ts_epoch = self.parse_timestamp(timestamp)
+            if ts_epoch is None:
+                logger.warning("webhook_invalid_timestamp_format", timestamp=str(timestamp))
+                return False
 
-        # Normalize comparison: compare both bare digest and prefixed format safely
+            if current_time is None:
+                now_epoch = datetime.now(timezone.utc).timestamp()
+            elif isinstance(current_time, datetime):
+                if current_time.tzinfo is None:
+                    current_time = current_time.replace(tzinfo=timezone.utc)
+                now_epoch = current_time.timestamp()
+            else:
+                now_epoch = float(current_time)
+
+            age = now_epoch - ts_epoch
+            # Reject expired delivery
+            if age > tolerance_seconds:
+                logger.warning(
+                    "webhook_timestamp_expired",
+                    age_seconds=round(age, 2),
+                    tolerance_seconds=tolerance_seconds,
+                )
+                return False
+
+            # Reject future-dated delivery beyond allowable clock drift
+            if age < -allow_future_seconds:
+                logger.warning(
+                    "webhook_timestamp_future_dated",
+                    drift_seconds=round(-age, 2),
+                    allow_future_seconds=allow_future_seconds,
+                )
+                return False
+
+        expected = self.sign_payload(payload, secret, timestamp=timestamp)
+
+        # Normalize comparison: compare both bare digest and prefixed format safely with constant time
         if received_signature.startswith("sha256="):
             return hmac.compare_digest(expected, received_signature)
         else:
             expected_bare = expected.removeprefix("sha256=")
             return hmac.compare_digest(expected_bare, received_signature)
+
+    def verify_delivery(
+        self,
+        headers: dict[str, str],
+        body: bytes | str,
+        secret: str,
+        tolerance_seconds: float = 300.0,
+        current_time: datetime | float | None = None,
+    ) -> tuple[bool, str]:
+        """
+        Convenience verification helper for webhook receivers.
+        Extracts signature and timestamp headers (supports X-Agent-Network-* and legacy X-Asama-*).
+        Returns (is_valid: bool, reason: str).
+        """
+        normalized_headers = {k.lower(): v for k, v in headers.items()}
+
+        sig = (
+            normalized_headers.get("x-agent-network-signature")
+            or normalized_headers.get("x-asama-signature")
+        )
+        if not sig:
+            return False, "Missing signature header (X-Agent-Network-Signature)"
+
+        ts = (
+            normalized_headers.get("x-agent-network-timestamp")
+            or normalized_headers.get("x-asama-timestamp")
+        )
+        if not ts:
+            return False, "Missing timestamp header (X-Agent-Network-Timestamp)"
+
+        is_valid = self.verify_signature(
+            payload=body,
+            secret=secret,
+            received_signature=sig,
+            timestamp=ts,
+            tolerance_seconds=tolerance_seconds,
+            current_time=current_time,
+        )
+        if not is_valid:
+            return False, "Signature verification failed or timestamp expired/invalid"
+
+        return True, "Valid"
 
 
 # Module-level singleton

@@ -37,6 +37,12 @@ class Notification(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, default="pending"
     )  # pending | delivered | read | failed
+    delivery_event_published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    interaction_event_published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
     delivery_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -44,3 +50,6 @@ class Notification(Base, TimestampMixin):
     # Relationships
     recipient: Mapped["Agent"] = relationship("Agent", back_populates="notifications")  # noqa: F821
     post: Mapped["Post"] = relationship("Post", back_populates="notifications")  # noqa: F821
+    interaction: Mapped["AgentInteraction | None"] = relationship(  # noqa: F821
+        "AgentInteraction", back_populates="notification", uselist=False, cascade="all, delete-orphan"
+    )

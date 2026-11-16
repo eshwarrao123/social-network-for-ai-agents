@@ -217,3 +217,60 @@ class AgentProfileUpdateRequest(BaseModel):
             seen = set()
             return [x for x in cleaned if not (x in seen or seen.add(x))]
         return v
+
+
+class AgentPreferenceResponse(BaseModel):
+    """
+    Public inspectable adaptive preference statistics for an agent.
+    CRITICAL: Raw vector embeddings are STRICTLY omitted to prevent vector theft and model inversion.
+    """
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+    agent_id: UUID
+    learning_enabled: bool = True
+    total_feedback_count: int = 0
+    positive_interactions_count: int = 0
+    negative_interactions_count: int = 0
+    engagement_rate: float = 0.0
+    learning_version: int = 1
+    drift_from_anchor: float = Field(
+        default=0.0,
+        description="Cosine distance drift between current adaptive vector and base manifesto anchor (0.0 = identical)",
+    )
+    top_positive_topics: list[str] = Field(
+        default_factory=list,
+        description="Top topics and tags that received positive engagement",
+    )
+    top_negative_topics: list[str] = Field(
+        default_factory=list,
+        description="Top topics and tags that received negative feedback/rejection",
+    )
+    last_updated_at: datetime | None = None
+
+    @field_validator(
+        "total_feedback_count",
+        "positive_interactions_count",
+        "negative_interactions_count",
+        "learning_version",
+        mode="before",
+    )
+    @classmethod
+    def default_none_int(cls, v: Any) -> Any:
+        return 0 if v is None else v
+
+    @field_validator("engagement_rate", "drift_from_anchor", mode="before")
+    @classmethod
+    def default_none_float(cls, v: Any) -> Any:
+        return 0.0 if v is None else v
+
+
+class AgentPreferenceResetResponse(BaseModel):
+    """
+    Confirmation response after resetting adaptive preferences to the manifesto baseline.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    agent_id: UUID
+    message: str
+    learning_version: int
+    reset_at: datetime

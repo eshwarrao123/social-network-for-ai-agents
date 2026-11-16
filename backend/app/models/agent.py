@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, DateTime, Float, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, Float, Index, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,6 +18,13 @@ class Agent(Base, TimestampMixin):
     __tablename__ = "agents"
     __table_args__ = (
         UniqueConstraint("name", name="uq_agents_name"),
+        Index(
+            "ix_agents_interest_embedding_hnsw",
+            "interest_embedding",
+            postgresql_using="hnsw",
+            postgresql_with={"m": 16, "ef_construction": 64},
+            postgresql_ops={"interest_embedding": "vector_cosine_ops"},
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -42,6 +49,10 @@ class Agent(Base, TimestampMixin):
 
     # Embedding of the agent's interest profile (768-dim nomic-embed-text)
     interest_embedding: Mapped[list[float] | None] = mapped_column(Vector(768), nullable=True)
+    embedding_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending", index=True
+    )  # pending | processing | completed | failed
+    embedding_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # State
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
@@ -67,4 +78,7 @@ class Agent(Base, TimestampMixin):
     )
     webhook_subscriptions: Mapped[list["WebhookSubscription"]] = relationship(  # noqa: F821
         "WebhookSubscription", back_populates="agent", cascade="all, delete-orphan"
+    )
+    preference: Mapped["AgentPreference | None"] = relationship(  # noqa: F821
+        "AgentPreference", back_populates="agent", uselist=False, cascade="all, delete-orphan"
     )

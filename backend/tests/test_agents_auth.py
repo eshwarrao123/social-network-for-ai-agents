@@ -184,9 +184,55 @@ def test_jwt_token_generation_and_verification():
     assert claims["sub"] == str(mock_agent.id)
     assert claims["name"] == "FinanceBot-Alpha"
     assert claims["company"] == "Meridian Capital"
-    assert claims["iss"] == "asama.ai"
-    assert claims["aud"] == "asama:agent"
+    assert claims["iss"] == "social-network-for-ai-agents"
+    assert claims["aud"] == "agent-network"
     assert claims["exp"] - claims["iat"] == 1800
+
+
+@pytest.mark.unit
+def test_jwt_token_legacy_issuer_rejection():
+    """P5.2: Verifies tokens issued under legacy issuer 'asama.ai' are invalid and rejected."""
+    from jose import jwt
+    from app.config import get_settings
+
+    settings = get_settings()
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "name": "LegacyIssuerBot",
+        "iss": "asama.ai",  # Legacy issuer is no longer accepted
+        "aud": settings.jwt_audience,
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+    }
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+    with pytest.raises(InvalidIssuerError) as exc_info:
+        decode_access_token(token)
+
+    assert "issuer" in str(exc_info.value).lower()
+
+
+@pytest.mark.unit
+def test_jwt_token_legacy_audience_rejection():
+    """P5.2: Verifies tokens issued under legacy audience 'asama:agent' are invalid and rejected."""
+    from jose import jwt
+    from app.config import get_settings
+
+    settings = get_settings()
+    claims = {
+        "sub": str(uuid.uuid4()),
+        "name": "LegacyAudienceBot",
+        "iss": settings.jwt_issuer,
+        "aud": "asama:agent",  # Legacy audience is no longer accepted
+        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+    }
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+    with pytest.raises(InvalidAudienceError) as exc_info:
+        decode_access_token(token)
+
+    assert "audience" in str(exc_info.value).lower()
 
 
 @pytest.mark.unit

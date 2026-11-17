@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import abc
 import asyncio
+import time
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -181,12 +182,38 @@ class BaseWorker(abc.ABC):
 
     async def _process_with_retry(self, redis, stream_name: str, msg_id: str, fields: dict, log) -> None:
         retry_count = int(fields.get("_retry_count", 0))
+        correlation_id = (
+            fields.get("correlation_id")
+            or fields.get("notification_id")
+            or fields.get("post_id")
+            or fields.get("agent_id")
+            or msg_id
+        )
+        bound_log = log.bind(
+            stream=stream_name,
+            msg_id=msg_id,
+            correlation_id=correlation_id,
+        )
+        t0 = time.perf_counter()
         try:
             await self.handle(fields)
+            duration_ms = round((time.perf_counter() - t0) * 1000, 2)
             await redis.xack(stream_name, self.group, msg_id)
-            log.debug("message_processed", stream=stream_name, msg_id=msg_id)
+            bound_log.info(
+                "message_processed",
+                duration_ms=duration_ms,
+                retry=retry_count,
+                status="success",
+            )
         except Exception as exc:
-            log.warning("message_failed", stream=stream_name, msg_id=msg_id, error=str(exc), retry=retry_count)
+            duration_ms = round((time.perf_counter() - t0) * 1000, 2)
+            bound_log.warning(
+                "message_failed",
+                duration_ms=duration_ms,
+                error=str(exc),
+                retry=retry_count,
+                status="failed",
+            )
             if retry_count >= self.settings.worker_retry_max:
                 # Send to dead-letter stream
                 dlq_stream = f"{stream_name}:dlq"
@@ -195,7 +222,12 @@ class BaseWorker(abc.ABC):
                     {**fields, "original_id": msg_id, "error": str(exc)},
                 )
                 await redis.xack(stream_name, self.group, msg_id)
-                log.error("message_dead_lettered", stream=stream_name, msg_id=msg_id, dlq=dlq_stream)
+                bound_log.error(
+                    "message_dead_lettered",
+                    duration_ms=duration_ms,
+                    dlq=dlq_stream,
+                    status="dead_lettered",
+                )
             else:
                 # Exponential backoff: re-add with incremented retry count
                 backoff = self.settings.worker_retry_backoff_seconds * (2 ** retry_count)

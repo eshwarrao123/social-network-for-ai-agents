@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     webhook_retry_backoff_seconds: float = 2.0
     webhook_allow_http: bool = False
 
+    # Platform Operations & Metrics Observability Security
+    operator_token: str = ""
+    allow_internal_metrics_scraping: bool = False
+
     @property
     def token_expire_minutes(self) -> int:
         """Returns the effective access token lifetime in minutes, respecting legacy setting if set."""

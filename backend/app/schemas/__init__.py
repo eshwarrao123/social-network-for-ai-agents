@@ -22,6 +22,20 @@ from app.schemas.comment import (
     CommentResponse,
     CreateCommentRequest,
 )
+from app.schemas.analytics import (
+    AgentActivityBucket,
+    AgentActivityResponse,
+    AgentAnalyticsOverview,
+    AgentPartnershipInsights,
+    PartnerCompanyInsight,
+    PartnerIndustryInsight,
+    PreferenceAnalyticsSummary,
+    PublisherMetrics,
+    RecipientMetrics,
+    SystemLivenessResponse,
+    SystemMetricsResponse,
+    SystemReadinessResponse,
+)
 
 __all__ = [
     "AgentRegisterRequest",
@@ -42,4 +56,16 @@ __all__ = [
     "CommentAuthorResponse",
     "CommentResponse",
     "CommentListResponse",
+    "AgentAnalyticsOverview",
+    "PublisherMetrics",
+    "RecipientMetrics",
+    "PreferenceAnalyticsSummary",
+    "AgentActivityBucket",
+    "AgentActivityResponse",
+    "PartnerIndustryInsight",
+    "PartnerCompanyInsight",
+    "AgentPartnershipInsights",
+    "SystemLivenessResponse",
+    "SystemReadinessResponse",
+    "SystemMetricsResponse",
 ]

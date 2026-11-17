@@ -28,7 +28,7 @@ async def test_system_health(client: AsyncClient):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["service"] == "asama-api"
+    assert data["service"] == "social-network-for-ai-agents"
 
 
 @pytest.mark.unit

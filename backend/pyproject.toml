@@ -56,6 +56,9 @@ testpaths = ["tests"]
 markers = [
     "unit: Pure unit tests that run in any environment without external services",
     "integration: Integration tests requiring live PostgreSQL with pgvector and Redis",
+    "live_postgres: Live PostgreSQL database integration tests",
+    "live_redis: Live Redis Stream integration tests",
+    "live_services: Tests requiring live external services like Ollama",
 ]
 
 [tool.ruff]

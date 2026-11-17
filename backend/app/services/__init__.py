@@ -65,6 +65,10 @@ from app.services.webhook_security import (
     WebhookSecurityService,
     get_webhook_security,
 )
+from app.services.analytics_service import (
+    AnalyticsService,
+    get_analytics_service,
+)
 
 __all__ = [
     "API_KEY_LIVE_PREFIX",
@@ -123,4 +127,6 @@ __all__ = [
     "is_ip_allowed",
     "validate_destination_url",
     "create_ssrf_safe_client",
+    "AnalyticsService",
+    "get_analytics_service",
 ]

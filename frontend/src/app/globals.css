@@ -1,1 +1,147 @@
 @import "tailwindcss";
+
+@theme {
+  --color-canvas: #F4F5F1;
+  --color-canvas-subtle: #EEF1ED;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F8F9F6;
+  --color-surface-hover: #F0F3EE;
+  --color-surface-selected: #E7ECE5;
+
+  --color-nav-bg: #18392F;
+  --color-nav-hover: #24493D;
+  --color-nav-active: rgba(255, 255, 255, 0.08);
+  --color-nav-pip: #B8D5C7;
+  --color-nav-text: #F4F5F1;
+  --color-nav-muted: #A3B5AC;
+
+  --color-brand-primary: #244C3B;
+  --color-brand-hover: #183A2C;
+  --color-brand-active: #132E23;
+  --color-brand-sage: #B8D5C7;
+  --color-brand-mint: #E4EEE8;
+
+  --color-text-primary: #1B2520;
+  --color-text-secondary: #647169;
+  --color-text-muted: #87928A;
+  --color-text-disabled: #A8B2AA;
+
+  --color-border-default: #E0E6DF;
+  --color-border-subtle: #E9EDE7;
+  --color-border-focus: #244C3B;
+
+  --color-status-success-text: #1B5E20;
+  --color-status-success-bg: #E8F5E9;
+  --color-status-success-border: #C8E6C9;
+
+  --color-status-warning-text: #B45309;
+  --color-status-warning-bg: #FEF3C7;
+  --color-status-warning-border: #FDE68A;
+
+  --color-status-error-text: #B91C1C;
+  --color-status-error-bg: #FEE2E2;
+  --color-status-error-border: #FECACA;
+
+  --color-status-neutral-text: #475569;
+  --color-status-neutral-bg: #F1F5F9;
+  --color-status-neutral-border: #E2E8F0;
+
+  --color-status-autonomous-text: #2D4A3E;
+  --color-status-autonomous-bg: #E7EFEA;
+  --color-status-autonomous-border: #CADCD0;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+:root {
+  /* Canvas & Ground Planes */
+  --bg-canvas: #F4F5F1;
+  --bg-canvas-subtle: #EEF1ED;
+
+  /* Surfaces & Content Cards */
+  --bg-surface: #FFFFFF;
+  --bg-surface-soft: #F8F9F6;
+  --bg-surface-hover: #F0F3EE;
+  --bg-surface-selected: #E7ECE5;
+
+  /* Navigation & Command Shell */
+  --nav-bg: #18392F;
+  --nav-hover: #24493D;
+  --nav-active: rgba(255, 255, 255, 0.08);
+  --nav-pip: #B8D5C7;
+  --nav-text: #F4F5F1;
+  --nav-muted: #A3B5AC;
+
+  /* Typography */
+  --text-primary: #1B2520;
+  --text-secondary: #647169;
+  --text-muted: #87928A;
+  --text-disabled: #A8B2AA;
+
+  /* Structural Borders */
+  --border-default: #E0E6DF;
+  --border-subtle: #E9EDE7;
+  --border-focus: #244C3B;
+
+  /* Primary Brand Actions */
+  --brand-primary: #244C3B;
+  --brand-hover: #183A2C;
+  --brand-active: #132E23;
+  --brand-sage: #B8D5C7;
+  --brand-mint: #E4EEE8;
+
+  /* Functional Status Signals */
+  --status-success: #1B5E20;
+  --status-warning: #B45309;
+  --status-error: #B91C1C;
+  --status-neutral: #475569;
+  --status-autonomous: #2D4A3E;
+}
+
+/* Base custom utility styles */
+body {
+  background-color: #F4F5F1;
+  color: #1B2520;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  caret-color: #244C3B;
+}
+
+/* Browser surface defaults: Themed selection */
+::selection {
+  background-color: rgba(184, 213, 199, 0.45);
+  color: #18392F;
+}
+
+/* Tabular figures for monospace data */
+.font-mono {
+  font-feature-settings: "tnum" 1, "cv05" 1;
+}
+
+/* Focus outline accessibility */
+:focus-visible {
+  outline: 2px solid #244C3B;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for warm surfaces */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E0E6DF;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4CEC2;
+}

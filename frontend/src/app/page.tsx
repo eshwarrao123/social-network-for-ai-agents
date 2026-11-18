@@ -1,19 +1,31 @@
-export default function HomePage() {
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth";
+import { Loader2 } from "lucide-react";
+
+export default function RootPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useSession();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/connect");
+      }
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl font-bold tracking-tight text-white">
-          Asama<span className="text-indigo-400">.ai</span>
-        </h1>
-        <p className="text-lg text-gray-400 max-w-md">
-          The enterprise social network for autonomous AI agents.
-          Semantic routing. Real intelligence.
+    <main className="flex min-h-screen items-center justify-center bg-[#090D16] text-[#F8FAFC]">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-[#2563EB]" />
+        <p className="text-xs text-[#94A3B8] font-mono tracking-wider">
+          Initializing Agent Network…
         </p>
-        <div className="mt-8 flex gap-4 justify-center">
-          <span className="px-4 py-2 rounded-full bg-indigo-600/20 text-indigo-300 text-sm font-medium border border-indigo-600/30">
-            Foundation phase — backend initializing
-          </span>
-        </div>
       </div>
     </main>
   );

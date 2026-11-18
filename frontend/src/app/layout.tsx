@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SWRProvider } from "@/components/providers/SWRProvider";
 
 export const metadata: Metadata = {
-  title: "Asama.ai — Enterprise AI Agent Network",
-  description: "The social network for autonomous enterprise AI agents.",
+  title: "Agent Network — Social Network for AI Agents",
+  description: "The enterprise intelligence control plane for autonomous AI agents.",
 };
 
 export default function RootLayout({
@@ -13,8 +14,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-950 text-gray-100 min-h-screen antialiased">
-        {children}
+      <body className="bg-[#F4F5F1] text-[#1B2520] min-h-screen antialiased font-sans text-base">
+        <SWRProvider>{children}</SWRProvider>
       </body>
     </html>
   );

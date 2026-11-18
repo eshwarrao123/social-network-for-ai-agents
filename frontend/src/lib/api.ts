@@ -1,11 +1,10 @@
 /**
- * Typed API client.
- * All requests go through Next.js rewrite (/api/*) — no backend URL in browser.
+ * Typed client for same-origin BFF API requests.
+ * All requests route to Next.js BFF proxy (/api/v1/*) — credentials (HttpOnly cookie)
+ * are managed automatically by the browser. Zero secrets in JavaScript memory or storage.
  */
 
-const API_BASE = "/api/v1";
-
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
@@ -16,53 +15,85 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit & { token?: string } = {}
-): Promise<T> {
-  const { token, ...fetchOptions } = options;
+interface RequestOptions extends Omit<RequestInit, "body"> {
+  body?: unknown;
+  params?: Record<string, string | number | boolean | undefined | null>;
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { body, params, headers: customHeaders, ...fetchOptions } = options;
+
+  let url = path.startsWith("/") ? path : `/${path}`;
+  if (!url.startsWith("/api/")) {
+    url = `/api/v1${url}`;
+  }
+
+  if (params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, val] of Object.entries(params)) {
+      if (val !== undefined && val !== null) {
+        searchParams.append(key, String(val));
+      }
+    }
+    const queryStr = searchParams.toString();
+    if (queryStr) {
+      url += (url.includes("?") ? "&" : "?") + queryStr;
+    }
+  }
+
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    Accept: "application/json",
+    ...(customHeaders as Record<string, string>),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  let serializedBody: BodyInit | undefined = undefined;
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+    serializedBody = JSON.stringify(body);
+  }
+
+  const res = await fetch(url, {
     ...fetchOptions,
     headers,
+    body: serializedBody,
+    credentials: "same-origin",
   });
 
   if (!res.ok) {
-    const detail = await res.json().catch(() => null);
-    throw new ApiError(
-      res.status,
-      detail?.detail ?? `HTTP ${res.status}`,
-      detail
-    );
+    const errorData = await res.json().catch(() => null);
+    const message =
+      (typeof errorData?.detail === "string" ? errorData.detail : null) ??
+      errorData?.message ??
+      `Request failed with status ${res.status}`;
+
+    // If 401 Unauthorized occurs on client side, notify session listeners
+    if (res.status === 401 && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("agent-session-expired"));
+    }
+
+    throw new ApiError(res.status, message, errorData?.detail ?? errorData);
+  }
+
+  if (res.status === 204) {
+    return null as T;
   }
 
   return res.json() as Promise<T>;
 }
 
 export const api = {
-  get: <T>(path: string, token?: string) =>
-    request<T>(path, { method: "GET", token }),
+  get: <T>(path: string, options?: Omit<RequestOptions, "method" | "body">) =>
+    request<T>(path, { ...options, method: "GET" }),
 
-  post: <T>(path: string, body: unknown, token?: string) =>
-    request<T>(path, {
-      method: "POST",
-      body: JSON.stringify(body),
-      token,
-    }),
+  post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
+    request<T>(path, { ...options, method: "POST", body }),
 
-  put: <T>(path: string, body: unknown, token?: string) =>
-    request<T>(path, {
-      method: "PUT",
-      body: JSON.stringify(body),
-      token,
-    }),
+  put: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
+    request<T>(path, { ...options, method: "PUT", body }),
 
-  del: <T>(path: string, token?: string) =>
-    request<T>(path, { method: "DELETE", token }),
+  patch: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
+    request<T>(path, { ...options, method: "PATCH", body }),
+
+  del: <T>(path: string, options?: Omit<RequestOptions, "method" | "body">) =>
+    request<T>(path, { ...options, method: "DELETE" }),
 };
-
-export { ApiError };

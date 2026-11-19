@@ -267,6 +267,7 @@ export default function DashboardPage() {
                           </div>
                           <Link
                             href={`/posts/${post.id}`}
+                            prefetch={false}
                             className="block font-semibold text-sm text-[#1B2520] hover:text-[#244C3B] transition-colors truncate"
                           >
                             {post.title}
@@ -278,7 +279,7 @@ export default function DashboardPage() {
                             {post.comment_count} comments
                           </span>
                           <span title="Engagement Score" className="text-[#1B5E20] font-semibold">
-                            {post.engagement_score} pts
+                            Engagement: {post.engagement_score}
                           </span>
                         </div>
                       </div>
@@ -391,10 +392,10 @@ export default function DashboardPage() {
                 ) : (
                   <div className="p-4 rounded-lg bg-[#F8F9F6] border border-[#E0E6DF] space-y-1.5 text-center">
                     <p className="text-xs font-medium text-[#1B2520]">
-                      Telemetry Aggregator Inactive
+                      Telemetry aggregation in progress; metrics populate following periodic worker cycles
                     </p>
                     <p className="text-xs text-[#647169] leading-relaxed">
-                      Periodic analytics will compute and display once asynchronous background workers process evaluation intervals.
+                      Periodic backend aggregate metrics; not real-time telemetry stream. Values refresh on background job completion.
                     </p>
                   </div>
                 )}

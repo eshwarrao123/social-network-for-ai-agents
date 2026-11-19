@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import useSWR from "swr";
 import {
   MessageSquare,
@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Clock,
   Sparkles,
-  Cpu,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import type { CommentResponse, CommentListResponse, CreateCommentRequest } from "@/types";
@@ -104,15 +103,15 @@ export function CommentThread({
   };
 
   return (
-    <section className="space-y-6 pt-6 border-t border-white/[0.07]" aria-label="Discussion">
+    <section className="space-y-6 pt-6 border-t border-[#E0E6DF]" aria-label="Discussion">
       {/* Discussion Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-blue-400" />
-          <h2 className="text-base font-semibold text-[#F1F5F9]">
+          <MessageSquare className="w-4 h-4 text-[#244C3B]" />
+          <h2 className="text-base font-semibold text-[#1B2520]">
             Discussion & Autonomous Inquiries
           </h2>
-          <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-white/[0.04] text-[#94A3B8] border border-white/[0.08]">
+          <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-[#EEF1ED] text-[#244C3B] border border-[#E0E6DF]">
             {commentsData?.total ?? comments.length}
           </span>
         </div>
@@ -124,34 +123,34 @@ export function CommentThread({
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="p-4 rounded-xl bg-[#0E131C] border border-white/[0.08] space-y-2.5 animate-pulse"
+              className="p-4 rounded-xl bg-white border border-[#E0E6DF] space-y-2.5 animate-pulse shadow-none"
             >
               <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <div className="w-5 h-5 rounded bg-white/[0.05]" />
-                  <div className="w-24 h-4 rounded bg-white/[0.05]" />
+                <div className="flex gap-2.5 items-center">
+                  <div className="w-7 h-7 rounded-lg bg-[#EEF1ED]" />
+                  <div className="w-28 h-4 rounded bg-[#EEF1ED]" />
                 </div>
-                <div className="w-16 h-4 rounded bg-white/[0.05]" />
+                <div className="w-16 h-4 rounded bg-[#EEF1ED]" />
               </div>
-              <div className="w-full h-4 rounded bg-white/[0.03]" />
+              <div className="w-full h-4 rounded bg-[#F8F9F6]" />
             </div>
           ))}
         </div>
       ) : commentsError ? (
         <div
           role="alert"
-          className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2"
+          className="p-4 rounded-xl bg-[#FEE2E2] border border-[#FECACA] text-[#991B1B] text-xs flex items-center gap-2"
         >
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+          <AlertCircle className="w-4 h-4 text-[#B91C1C] shrink-0" />
           <span>Failed to load discussion comments.</span>
         </div>
       ) : comments.length === 0 ? (
-        <div className="p-8 rounded-xl bg-[#0E131C] border border-white/[0.08] text-center space-y-2">
-          <div className="w-10 h-10 mx-auto rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#64748B]">
-            <MessageSquare className="w-5 h-5 text-[#3B82F6]" />
+        <div className="p-8 rounded-xl bg-white border border-[#E0E6DF] text-center space-y-2 shadow-none">
+          <div className="w-10 h-10 mx-auto rounded-xl bg-[#EEF1ED] border border-[#E0E6DF] flex items-center justify-center text-[#244C3B]">
+            <MessageSquare className="w-5 h-5 text-[#244C3B]" />
           </div>
-          <h3 className="text-xs font-semibold text-[#F1F5F9]">No comments yet</h3>
-          <p className="text-[11px] text-[#94A3B8] max-w-sm mx-auto">
+          <h3 className="text-sm font-semibold text-[#1B2520]">No comments yet</h3>
+          <p className="text-xs text-[#647169] max-w-sm mx-auto">
             Autonomous agent decisions and operator inquiries on this opportunity will appear here chronologically.
           </p>
         </div>
@@ -162,10 +161,10 @@ export function CommentThread({
               key={comment.id}
               data-testid={`comment-card-${comment.id}`}
               className={cn(
-                "p-4 rounded-xl border transition-colors space-y-2.5",
+                "p-4 sm:p-5 rounded-xl border transition-colors space-y-2.5 shadow-none",
                 comment.is_llm_generated
-                  ? "bg-purple-950/[0.08] border-purple-500/20"
-                  : "bg-[#0E131C] border-white/[0.08]"
+                  ? "bg-[#E7EFEA] border-[#CADCD0]"
+                  : "bg-white border-[#E0E6DF]"
               )}
             >
               {/* Comment Author & Meta Bar */}
@@ -173,10 +172,10 @@ export function CommentThread({
                 <div className="flex items-center gap-2 min-w-0">
                   <div
                     className={cn(
-                      "w-6 h-6 rounded flex items-center justify-center shrink-0",
+                      "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
                       comment.is_llm_generated
-                        ? "bg-purple-500/10 text-purple-300 border border-purple-500/20"
-                        : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        ? "bg-[#244C3B] text-white"
+                        : "bg-[#EEF1ED] text-[#244C3B] border border-[#E0E6DF]"
                     )}
                   >
                     {comment.is_llm_generated ? (
@@ -186,19 +185,19 @@ export function CommentThread({
                     )}
                   </div>
 
-                  <span className="font-medium text-[#F1F5F9] truncate">
+                  <span className="font-semibold text-sm text-[#1B2520] truncate">
                     {comment.author.name}
                   </span>
-                  <span className="text-[#475569]">·</span>
-                  <span className="text-[#94A3B8] truncate">
+                  <span className="text-[#87928A]">·</span>
+                  <span className="text-xs text-[#647169] truncate">
                     {comment.author.company}
                   </span>
 
                   <span
-                    className="flex items-center gap-0.5 text-emerald-400 font-mono text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                    className="flex items-center gap-1 text-[#183A2C] font-mono text-xs px-2 py-0.5 rounded-full bg-[#E4EEE8] border border-[#B8D5C7]"
                     title={`Verified Platform Trust Score: ${(comment.author.trust_score * 100).toFixed(0)}%`}
                   >
-                    <ShieldCheck className="w-2.5 h-2.5" />
+                    <ShieldCheck className="w-3 h-3 text-[#183A2C]" />
                     {(comment.author.trust_score * 100).toFixed(0)}%
                   </span>
 
@@ -206,18 +205,18 @@ export function CommentThread({
                   {comment.is_llm_generated && (
                     <span
                       data-testid="autonomous-llm-badge"
-                      className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 shrink-0"
+                      className="inline-flex items-center gap-1 text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-[#244C3B] text-white shrink-0"
                     >
-                      <Sparkles className="w-3 h-3 text-purple-300" />
-                      <span>Autonomous LLM</span>
+                      <Sparkles className="w-3 h-3 text-[#B8D5C7]" />
+                      <span>Autonomous Agent</span>
                       {comment.llm_model && (
-                        <span className="text-purple-200 font-semibold">
+                        <span className="text-[#E4EEE8] font-normal">
                           ({comment.llm_model})
                         </span>
                       )}
                       {comment.confidence_score !== null &&
                         comment.confidence_score !== undefined && (
-                          <span className="text-purple-300 ml-0.5">
+                          <span className="text-[#B8D5C7] ml-0.5">
                             {(comment.confidence_score * 100).toFixed(0)}%
                           </span>
                         )}
@@ -225,8 +224,8 @@ export function CommentThread({
                   )}
                 </div>
 
-                <div className="flex items-center gap-1 text-[#64748B] font-mono text-[11px] shrink-0">
-                  <Clock className="w-3 h-3" />
+                <div className="flex items-center gap-1 text-[#647169] font-mono text-xs shrink-0">
+                  <Clock className="w-3 h-3 text-[#87928A]" />
                   <time
                     dateTime={comment.created_at}
                     title={formatDateTime(comment.created_at)}
@@ -237,7 +236,7 @@ export function CommentThread({
               </div>
 
               {/* Comment Content */}
-              <p className="text-xs text-[#CBD5E1] leading-relaxed whitespace-pre-wrap pl-8">
+              <p className="text-sm text-[#1B2520] leading-relaxed whitespace-pre-wrap pl-9">
                 {comment.content}
               </p>
             </article>
@@ -247,16 +246,16 @@ export function CommentThread({
 
       {/* Comment Composer */}
       {isPostExpired ? (
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.07] text-xs text-[#94A3B8] text-center">
+        <div className="p-4 rounded-xl bg-[#F8F9F6] border border-[#E0E6DF] text-xs text-[#647169] text-center">
           This opportunity has reached its expiration time and no longer accepts comments or inquiries.
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="p-4 rounded-xl bg-[#0E131C] border border-white/[0.08] space-y-3">
+        <form onSubmit={handleSubmit} className="p-5 rounded-xl bg-white border border-[#E0E6DF] space-y-3 shadow-none">
           <div className="flex items-center justify-between text-xs">
-            <label htmlFor="comment-input" className="font-medium text-[#F1F5F9]">
+            <label htmlFor="comment-input" className="font-semibold text-xs text-[#1B2520]">
               Submit Inquiry or Negotiation Comment
             </label>
-            <span className="font-mono text-[11px] text-[#64748B]">
+            <span className="font-mono text-xs text-[#87928A]">
               {content.length}/2000
             </span>
           </div>
@@ -269,31 +268,31 @@ export function CommentThread({
             onChange={(e) => setContent(e.target.value)}
             disabled={isSubmitting}
             placeholder="Write a response, question, or commercial proposal on behalf of your enterprise agent..."
-            className="w-full px-3.5 py-2.5 rounded-lg bg-[#090B10] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-colors resize-y disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 rounded-lg bg-[#F8F9F6] border border-[#E0E6DF] text-sm text-[#1B2520] placeholder-[#87928A] focus:outline-none focus:border-[#244C3B] focus:bg-white focus:ring-1 focus:ring-[#244C3B] transition-colors resize-y disabled:opacity-50 min-h-[90px]"
           />
 
           {errorMessage && (
             <div
               role="alert"
-              className="p-2.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2"
+              className="p-3 rounded-lg bg-[#FEE2E2] border border-[#FECACA] text-[#991B1B] text-xs flex items-center gap-2"
             >
-              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-              <span>{errorMessage}</span>
+              <AlertCircle className="w-4 h-4 text-[#B91C1C] shrink-0" />
+              <span className="font-medium">{errorMessage}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
             <span
-              className="text-[10px] font-mono text-[#64748B]"
+              className="text-xs font-mono text-[#87928A]"
               title={`Idempotency key prevents duplicate comments upon network retry: ${idempotencyKey}`}
             >
-              Idempotency: {idempotencyKey.slice(0, 8)}…
+              Idempotency Key: {idempotencyKey.slice(0, 8)}…
             </span>
 
             <button
               type="submit"
               disabled={isSubmitting || !content.trim()}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-1.5 px-5 py-2 min-h-[44px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

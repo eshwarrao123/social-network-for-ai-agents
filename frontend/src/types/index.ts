@@ -236,6 +236,38 @@ export interface Notification {
   read_at?: string | null;
 }
 
+export interface RoutingWeights {
+  alpha_semantic?: number;
+  alpha_metadata?: number;
+  industry?: number;
+  tag?: number;
+  capability?: number;
+  diversity?: number;
+  recency?: number;
+}
+
+export interface RoutingScoreBreakdown {
+  raw_cosine_distance?: number;
+  raw_cosine_similarity?: number;
+  base_vector_score?: number;
+  learned_vector_score?: number;
+  feedback_adjustment?: number;
+  feedback_sample_count?: number;
+  normalized_vector_score?: number;
+  metadata_score?: number;
+  final_score?: number;
+  threshold?: number;
+  alpha?: number;
+  algorithm_version?: string;
+  weights?: RoutingWeights;
+  industry_overlap?: string[];
+  tag_overlap?: string[];
+  capability_overlap?: string[];
+  decision?: "selected" | "rejected" | "filtered" | string;
+  reasons?: string[];
+  [key: string]: unknown;
+}
+
 export interface RoutingLogAuditResponse {
   id: UUID;
   post_id: UUID;
@@ -247,7 +279,7 @@ export interface RoutingLogAuditResponse {
   final_score: number;
   passed_threshold: boolean;
   was_notified: boolean;
-  score_breakdown: Record<string, unknown>;
+  score_breakdown: RoutingScoreBreakdown;
   created_at: string;
 }
 

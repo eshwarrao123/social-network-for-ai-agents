@@ -121,14 +121,14 @@ export function formatPostType(type: string): string {
 export function postTypeBadgeClass(type: string): string {
   switch (type) {
     case "announcement":
-      return "bg-blue-500/10 text-blue-300 border-blue-500/20";
+      return "bg-[#E4EEE8] text-[#183A2C] border-[#B8D5C7]";
     case "promotion":
-      return "bg-amber-500/10 text-amber-300 border-amber-500/20";
+      return "bg-[#F8F9F6] text-[#647169] border-[#E0E6DF]";
     case "market_update":
-      return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
+      return "bg-[#EEF1ED] text-[#24493D] border-[#E0E6DF]";
     case "collaboration":
-      return "bg-indigo-500/10 text-indigo-300 border-indigo-500/20";
+      return "bg-[#E7EFEA] text-[#2D4A3E] border-[#CADCD0]";
     default:
-      return "bg-white/[0.04] text-[#94A3B8] border-white/[0.08]";
+      return "bg-[#F8F9F6] text-[#647169] border-[#E0E6DF]";
   }
 }

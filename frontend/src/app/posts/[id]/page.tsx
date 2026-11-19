@@ -12,7 +12,6 @@ import {
   cn,
   formatDate,
   formatDateTime,
-  formatRelativeTime,
   formatNumber,
   formatPostType,
   postTypeBadgeClass,
@@ -36,6 +35,8 @@ import {
   AlertTriangle,
   RotateCcw,
   Calendar,
+  Copy,
+  Check,
 } from "lucide-react";
 
 interface PostPageProps {
@@ -50,6 +51,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isRoutingDrawerOpen, setIsRoutingDrawerOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   // Fetch post details strictly on mount without speculative prefetching
   const {
@@ -74,6 +76,13 @@ export default function PostDetailPage({ params }: PostPageProps) {
     ? new Date(post.expires_at).getTime() <= Date.now()
     : false;
 
+  const handleCopyId = () => {
+    if (!post?.id) return;
+    navigator.clipboard.writeText(post.id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
   const handlePostUpdated = (updated: PostResponse) => {
     mutate(updated, false);
   };
@@ -97,45 +106,47 @@ export default function PostDetailPage({ params }: PostPageProps) {
   return (
     <AppShell>
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Back Navigation Bar */}
-        <div className="flex items-center justify-between">
+        {/* Back Navigation Bar & Author Actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link
             href="/feed"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] transition-colors"
+            prefetch={false}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#647169] hover:text-[#1B2520] transition-colors min-h-[44px]"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-4 h-4" />
             <span>Back to Discovery Feed</span>
           </Link>
 
-          {/* Author Management Actions Toolbar (Visible only if currentAgent is the verified author) */}
+          {/* Author Management Actions Toolbar */}
           {isAuthor && post && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setIsRoutingDrawerOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-xs font-medium text-blue-300 transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg bg-[#E4EEE8] hover:bg-[#B8D5C7]/60 border border-[#B8D5C7] text-xs font-semibold text-[#183A2C] transition-colors"
                 title="Inspect semantic routing candidates, scores, and decisions"
               >
-                <Compass className="w-3.5 h-3.5 text-blue-400" />
+                <Compass className="w-3.5 h-3.5 text-[#183A2C]" />
                 <span>Explain Routing</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsEditOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-[#F1F5F9] transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg bg-white hover:bg-[#F8F9F6] border border-[#E0E6DF] text-xs font-semibold text-[#1B2520] transition-colors"
               >
-                <Edit className="w-3.5 h-3.5 text-[#94A3B8]" />
+                <Edit className="w-3.5 h-3.5 text-[#647169]" />
                 <span>Edit</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsDeleteOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-medium text-red-300 transition-colors"
+                aria-label="Delete"
+                className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-lg bg-[#FEE2E2] hover:bg-[#FECACA] border border-[#FECACA] text-xs font-semibold text-[#991B1B] transition-colors"
               >
-                <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                <span>Delete</span>
+                <Trash2 className="w-3.5 h-3.5 text-[#B91C1C]" />
+                <span>Retract</span>
               </button>
             </div>
           )}
@@ -143,46 +154,47 @@ export default function PostDetailPage({ params }: PostPageProps) {
 
         {/* Loading State Skeleton */}
         {isLoading ? (
-          <div className="p-8 rounded-xl bg-[#0E131C] border border-white/[0.08] space-y-6 animate-pulse" aria-busy="true">
+          <div className="p-8 rounded-xl bg-white border border-[#E0E6DF] space-y-6 shadow-none animate-pulse" aria-busy="true">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/[0.05]" />
+              <div className="w-10 h-10 rounded-lg bg-[#EEF1ED]" />
               <div className="space-y-1.5">
-                <div className="w-40 h-4 rounded bg-white/[0.05]" />
-                <div className="w-24 h-3 rounded bg-white/[0.03]" />
+                <div className="w-40 h-4 rounded bg-[#EEF1ED]" />
+                <div className="w-24 h-3 rounded bg-[#F8F9F6]" />
               </div>
             </div>
-            <div className="w-3/4 h-7 rounded bg-white/[0.05]" />
+            <div className="w-3/4 h-8 rounded bg-[#EEF1ED]" />
             <div className="space-y-2">
-              <div className="w-full h-4 rounded bg-white/[0.03]" />
-              <div className="w-full h-4 rounded bg-white/[0.03]" />
-              <div className="w-5/6 h-4 rounded bg-white/[0.03]" />
+              <div className="w-full h-4 rounded bg-[#F8F9F6]" />
+              <div className="w-full h-4 rounded bg-[#F8F9F6]" />
+              <div className="w-5/6 h-4 rounded bg-[#F8F9F6]" />
             </div>
           </div>
         ) : error ? (
           /* Error / 404 State */
           <div
             role="alert"
-            className="p-12 rounded-xl bg-[#0E131C] border border-white/[0.08] text-center space-y-4"
+            className="p-12 rounded-xl bg-white border border-[#E0E6DF] text-center space-y-4 shadow-none"
           >
-            <div className="w-10 h-10 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+            <div className="w-10 h-10 mx-auto rounded-full bg-[#FEE2E2] border border-[#FECACA] flex items-center justify-center text-[#B91C1C]">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-base font-semibold text-[#F1F5F9]">
+              <h2 className="text-base font-semibold text-[#1B2520]">
                 {error instanceof ApiError && error.status === 404
                   ? "Opportunity Not Found"
                   : "Failed to Load Opportunity"}
               </h2>
-              <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+              <p className="text-xs text-[#647169] max-w-sm mx-auto">
                 {error instanceof ApiError && error.status === 404
-                  ? "This opportunity does not exist, has expired, or was removed by its author."
+                  ? "This opportunity does not exist, has expired, or was retracted by its author."
                   : error.message || "An error occurred while fetching opportunity details."}
               </p>
             </div>
             <div className="pt-2 flex justify-center gap-3">
               <Link
                 href="/feed"
-                className="px-4 py-2 rounded-md bg-[#141A26] hover:bg-[#1C2434] border border-white/[0.08] text-xs font-medium text-[#F1F5F9]"
+                prefetch={false}
+                className="px-4 py-2 min-h-[44px] rounded-lg bg-white hover:bg-[#F8F9F6] border border-[#E0E6DF] text-xs font-semibold text-[#1B2520] transition-colors inline-flex items-center"
               >
                 Back to Feed
               </Link>
@@ -190,7 +202,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
                 <button
                   type="button"
                   onClick={() => mutate()}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium"
+                  className="flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Retry</span>
@@ -201,31 +213,31 @@ export default function PostDetailPage({ params }: PostPageProps) {
         ) : !post ? null : (
           /* Full Opportunity Content */
           <div className="space-y-6">
-            <article className="p-6 sm:p-8 rounded-xl bg-[#0E131C] border border-white/[0.08] space-y-6">
+            <article className="p-6 sm:p-8 rounded-xl bg-white border border-[#E0E6DF] space-y-6 shadow-none">
               {/* Author Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/[0.07]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-[#E0E6DF]">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                    <Building className="w-4 h-4" />
+                  <div className="w-10 h-10 rounded-lg bg-[#E4EEE8] border border-[#B8D5C7] flex items-center justify-center text-[#183A2C] shrink-0">
+                    <Building className="w-5 h-5" />
                   </div>
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#F1F5F9]">
+                      <span className="text-base font-semibold text-[#1B2520]">
                         {post.author.name}
                       </span>
-                      <span className="text-xs text-[#94A3B8]">
+                      <span className="text-xs text-[#647169]">
                         ({post.author.company})
                       </span>
                       <span
-                        className="flex items-center gap-0.5 text-emerald-400 font-mono text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                        className="flex items-center gap-1 text-[#183A2C] font-mono text-xs px-2 py-0.5 rounded-full bg-[#E4EEE8] border border-[#B8D5C7]"
                         title={`Verified Platform Trust Score: ${(post.author.trust_score * 100).toFixed(0)}%`}
                       >
-                        <ShieldCheck className="w-3 h-3" />
+                        <ShieldCheck className="w-3 h-3 text-[#183A2C]" />
                         {(post.author.trust_score * 100).toFixed(0)}%
                       </span>
                     </div>
                     {post.author.industries && post.author.industries.length > 0 && (
-                      <p className="text-[11px] text-[#64748B]">
+                      <p className="text-xs text-[#647169]">
                         Focus: {post.author.industries.join(", ")}
                       </p>
                     )}
@@ -235,7 +247,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "text-xs uppercase font-mono px-2.5 py-1 rounded border",
+                      "text-xs uppercase font-mono font-semibold px-2.5 py-1 rounded-md border",
                       postTypeBadgeClass(post.post_type)
                     )}
                   >
@@ -246,20 +258,20 @@ export default function PostDetailPage({ params }: PostPageProps) {
 
               {/* Title & Metadata */}
               <div className="space-y-3">
-                <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-[#F1F5F9] leading-snug">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1B2520] leading-snug">
                   {post.title}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#64748B]">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
+                <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#647169]">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#87928A]" />
                     Published {formatDateTime(post.published_at)}
                   </span>
                   {post.expires_at && (
                     <span
                       className={cn(
-                        "flex items-center gap-1",
-                        isExpired ? "text-red-400" : "text-[#94A3B8]"
+                        "flex items-center gap-1.5",
+                        isExpired ? "text-[#B91C1C]" : "text-[#647169]"
                       )}
                     >
                       <Calendar className="w-3.5 h-3.5" />
@@ -270,23 +282,23 @@ export default function PostDetailPage({ params }: PostPageProps) {
                 </div>
               </div>
 
-              {/* Complete Content Body */}
-              <div className="text-sm text-[#CBD5E1] leading-relaxed whitespace-pre-wrap font-sans">
+              {/* Complete Content Body (65-75ch Measure) */}
+              <div className="max-w-[72ch] text-base text-[#2C3830] leading-relaxed whitespace-pre-wrap font-sans">
                 {post.content}
               </div>
 
               {/* Target Industries & Tags */}
-              <div className="space-y-3 pt-4 border-t border-white/[0.07]">
+              <div className="space-y-3 pt-4 border-t border-[#E0E6DF]">
                 {post.target_industries && post.target_industries.length > 0 && (
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider font-mono">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-[#647169] uppercase tracking-wider font-mono">
                       Target Industries:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {post.target_industries.map((ind) => (
                         <span
                           key={ind}
-                          className="text-xs font-mono px-2.5 py-0.5 rounded bg-blue-500/10 text-[#93C5FD] border border-blue-500/20"
+                          className="text-xs font-mono px-2.5 py-0.5 rounded-md bg-[#EEF1ED] text-[#24493D] border border-[#E0E6DF]"
                         >
                           {ind}
                         </span>
@@ -296,17 +308,17 @@ export default function PostDetailPage({ params }: PostPageProps) {
                 )}
 
                 {post.tags && post.tags.length > 0 && (
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider font-mono">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-[#647169] uppercase tracking-wider font-mono">
                       Relevance Tags:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {post.tags.map((t) => (
                         <span
                           key={t}
-                          className="text-xs font-mono px-2 py-0.5 rounded bg-white/[0.03] text-[#94A3B8] border border-white/[0.07] flex items-center gap-1"
+                          className="text-xs font-mono px-2 py-0.5 rounded-md bg-[#F8F9F6] text-[#647169] border border-[#E0E6DF] flex items-center gap-1"
                         >
-                          <TagIcon className="w-3 h-3 text-[#475569]" />
+                          <TagIcon className="w-3 h-3 text-[#87928A]" />
                           <span>{t}</span>
                         </span>
                       ))}
@@ -316,27 +328,40 @@ export default function PostDetailPage({ params }: PostPageProps) {
               </div>
 
               {/* Metrics Bar */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/[0.07] text-xs font-mono text-[#64748B]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[#E0E6DF] text-xs font-mono text-[#647169]">
                 <div className="flex items-center gap-5">
                   <span className="flex items-center gap-1.5" title="Read Views">
-                    <Eye className="w-4 h-4" />
-                    <strong className="text-[#94A3B8]">{formatNumber(post.view_count)}</strong> views
+                    <Eye className="w-4 h-4 text-[#87928A]" />
+                    <strong className="text-[#1B2520]">{formatNumber(post.view_count)}</strong> views
                   </span>
-                  <span className="flex items-center gap-1.5" title="Comments Authored">
-                    <MessageSquare className="w-4 h-4" />
-                    <strong className="text-[#94A3B8]">{formatNumber(post.comment_count)}</strong> discussions
+                  <span className="flex items-center gap-1.5" title="Discussions">
+                    <MessageSquare className="w-4 h-4 text-[#87928A]" />
+                    <strong className="text-[#1B2520]">{formatNumber(post.comment_count)}</strong> discussions
                   </span>
                   {post.engagement_score > 0 && (
-                    <span className="flex items-center gap-1.5 text-[#3B82F6]">
+                    <span className="flex items-center gap-1.5 text-[#1B5E20] font-semibold">
                       <TrendingUp className="w-4 h-4" />
-                      Score {post.engagement_score}
+                      Engagement: {post.engagement_score}
                     </span>
                   )}
                 </div>
 
-                <span className="text-[11px] text-[#475569]">
-                  Post ID: {post.id}
-                </span>
+                <div className="flex items-center gap-1 text-xs text-[#87928A]">
+                  <span>Post ID:</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyId}
+                    title="Click to copy full Post UUID"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#F8F9F6] hover:bg-[#EEF1ED] border border-[#E0E6DF] font-mono text-xs text-[#1B2520] transition-colors"
+                  >
+                    <span>{post.id.slice(0, 8)}…</span>
+                    {copiedId ? (
+                      <Check className="w-3 h-3 text-[#1B5E20]" />
+                    ) : (
+                      <Copy className="w-3 h-3 text-[#87928A]" />
+                    )}
+                  </button>
+                </div>
               </div>
             </article>
 

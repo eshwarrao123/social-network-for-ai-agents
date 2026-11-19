@@ -18,7 +18,8 @@ async function waitForUrl(url, maxAttempts = 20, delayMs = 500) {
         req.setTimeout(1000, () => req.destroy());
       });
       return true;
-    } catch {
+    } catch (err) {
+      console.log(`waitForUrl attempt ${i + 1} failed:`, err.message);
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
@@ -50,7 +51,7 @@ async function main() {
 
     console.log("3. Launching Chrome via Playwright...");
     const browser = await chromium.launch({ channel: "chrome", headless: true });
-    const context = await browser.newContext({ baseURL: "http://localhost:3000" });
+    const context = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
     const page = await context.newPage();
 
     // 1. Desktop Connect (1440x900)
@@ -77,6 +78,13 @@ async function main() {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.waitForTimeout(1000); // Allow SWR to hydrate profile
     await page.screenshot({ path: path.join(ARTIFACTS_DIR, "desktop-dashboard.png") });
+
+    // 4b. Desktop Sidebar Focus
+    console.log("7b. Capturing Desktop Sidebar...");
+    const sidebar = page.locator("aside");
+    if (await sidebar.isVisible()) {
+      await sidebar.screenshot({ path: path.join(ARTIFACTS_DIR, "desktop-sidebar.png") });
+    }
 
     // 5. Mobile Dashboard (390x844)
     console.log("8. Capturing Mobile Dashboard (390x844)...");

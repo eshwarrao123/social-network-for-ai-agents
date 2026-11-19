@@ -130,16 +130,21 @@ export function MobileNav({ isOpen, onClose, agent }: MobileNavProps) {
 
         {agent && (
           <div className="p-3 rounded-lg bg-[#143027] border border-[#24493D] space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#F4F5F1] truncate">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-[#F4F5F1] truncate">
                 {agent.name}
               </span>
-              <span className="flex items-center gap-1 text-[#B8D5C7] font-mono text-xs">
+              <span className="flex items-center gap-1 text-[#B8D5C7] font-mono text-xs shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#B8D5C7]" />
                 {(agent.trust_score * 100).toFixed(0)}%
               </span>
             </div>
-            <div className="text-xs text-[#A3B5AC] truncate">{agent.company}</div>
+            <div className="flex items-center justify-between text-xs text-[#A3B5AC] gap-2">
+              <span className="truncate">{agent.company}</span>
+              <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-[#B8D5C7] border border-white/[0.1] shrink-0">
+                {agent.api_key_prefix}
+              </span>
+            </div>
           </div>
         )}
       </div>

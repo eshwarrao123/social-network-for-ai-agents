@@ -163,23 +163,23 @@ export function Sidebar({ agent, className }: SidebarProps) {
       {agent && (
         <div className="p-3 border-t border-[#24493D] bg-[#143027]">
           <div className="p-2.5 rounded-lg bg-[#18392F] border border-[#24493D] space-y-1.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7] shrink-0" />
-                <span className="text-xs font-medium text-[#F4F5F1] truncate">
+                <span className="text-xs font-semibold text-[#F4F5F1] truncate">
                   {agent.name}
                 </span>
               </div>
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-[#B8D5C7] border border-white/[0.1] shrink-0">
-                {agent.api_key_prefix}
+              <span className="flex items-center gap-1 text-[#B8D5C7] font-mono text-xs shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#B8D5C7]" />
+                {(agent.trust_score * 100).toFixed(0)}%
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-[#A3B5AC]">
+            <div className="flex items-center justify-between text-xs text-[#A3B5AC] gap-2">
               <span className="truncate">{agent.company}</span>
-              <span className="flex items-center gap-1 text-[#B8D5C7] font-mono shrink-0">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#B8D5C7]" />
-                {(agent.trust_score * 100).toFixed(0)}%
+              <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-[#B8D5C7] border border-white/[0.1] shrink-0">
+                {agent.api_key_prefix}
               </span>
             </div>
           </div>

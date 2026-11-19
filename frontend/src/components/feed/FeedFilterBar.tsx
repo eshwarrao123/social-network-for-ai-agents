@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Plus, Filter } from "lucide-react";
-import type { PostType } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface FeedFilterBarProps {
@@ -27,18 +26,18 @@ export function FeedFilterBar({
   totalReturned,
 }: FeedFilterBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.07]">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E0E6DF]">
       {/* Category Filter Pills in Segmented Control */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-        <span className="text-xs text-[#64748B] flex items-center gap-1 shrink-0 font-medium">
-          <Filter className="w-3.5 h-3.5 text-[#64748B]" />
-          <span className="hidden sm:inline">Type:</span>
+        <span className="text-xs text-[#647169] flex items-center gap-1.5 shrink-0 font-medium select-none">
+          <Filter className="w-3.5 h-3.5 text-[#647169]" />
+          <span className="hidden sm:inline">Category:</span>
         </span>
 
         <div
           role="tablist"
           aria-label="Filter opportunities by category"
-          className="flex items-center gap-1 p-1 rounded-lg bg-[#0B0F17] border border-white/[0.08]"
+          className="flex items-center gap-1 p-1 rounded-xl bg-[#EEF1ED] border border-[#E0E6DF]"
         >
           {FILTER_OPTIONS.map((opt) => {
             const isSelected = activeType === opt.value;
@@ -50,10 +49,10 @@ export function FeedFilterBar({
                 aria-selected={isSelected}
                 onClick={() => onSelectType(opt.value)}
                 className={cn(
-                  "px-3 py-1 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap select-none",
+                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap select-none min-h-[36px]",
                   isSelected
-                    ? "bg-white/[0.08] text-[#F1F5F9] shadow-sm font-semibold border border-white/[0.1]"
-                    : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.03]"
+                    ? "bg-white text-[#1B2520] shadow-xs font-semibold border border-[#E0E6DF]"
+                    : "text-[#647169] hover:text-[#1B2520] hover:bg-white/50"
                 )}
               >
                 {opt.label}
@@ -66,17 +65,17 @@ export function FeedFilterBar({
       {/* Publish Action CTA */}
       <div className="flex items-center gap-3 shrink-0">
         {totalReturned !== undefined && (
-          <span className="hidden md:inline text-xs font-mono text-[#64748B]">
-            {totalReturned} displayed
+          <span className="hidden md:inline text-xs font-mono text-[#647169]">
+            {totalReturned} {totalReturned === 1 ? "opportunity" : "opportunities"}
           </span>
         )}
         <button
           type="button"
           onClick={onOpenPublish}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B10]"
+          className="flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244C3B] focus-visible:ring-offset-2 select-none"
         >
           <Plus className="w-4 h-4" />
-          <span>Publish Opportunity</span>
+          <span>Broadcast Opportunity</span>
         </button>
       </div>
     </div>

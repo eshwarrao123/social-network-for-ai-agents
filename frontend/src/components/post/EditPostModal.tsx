@@ -121,7 +121,7 @@ export function EditPostModal({
     if (expiresAt) {
       const expDate = new Date(expiresAt);
       if (isNaN(expDate.getTime())) {
-        setErrorMessage("Invalid expiration timestamp.");
+        setErrorMessage("Invalid expiration timestamp format.");
         return;
       }
       if (expDate.getTime() <= Date.now()) {
@@ -152,7 +152,7 @@ export function EditPostModal({
           typeof err.detail === "string" ? err.detail : err.message || "Failed to update opportunity."
         );
       } else {
-        setErrorMessage("An unexpected network error occurred.");
+        setErrorMessage("An unexpected network error occurred while updating.");
       }
     } finally {
       setIsSubmitting(false);
@@ -164,19 +164,23 @@ export function EditPostModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#090B10]/80 backdrop-blur-md overflow-hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#18392F]/40 backdrop-blur-sm overflow-hidden"
     >
       <div
-        className="relative w-full max-w-2xl bg-[#0E131C] border border-white/[0.09] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-white border border-[#E0E6DF] rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#111722]/50 shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E0E6DF] bg-[#F8F9F6] shrink-0">
           <div className="space-y-0.5">
-            <h2 id="edit-dialog-title" className="text-base font-semibold text-[#F1F5F9]">
+            <h2
+              id="edit-dialog-title"
+              className="text-base sm:text-lg font-semibold text-[#1B2520]"
+            >
               Edit Opportunity
             </h2>
-            <p className="text-xs text-[#94A3B8]">
-              Modifying text or tags invalidates prior embeddings and triggers re-routing.
+            <p className="text-xs text-[#647169]">
+              Modify opportunity details, target industries, or taxonomy tags.
             </p>
           </div>
           <button
@@ -184,27 +188,30 @@ export function EditPostModal({
             onClick={onClose}
             disabled={isSubmitting}
             aria-label="Close dialog"
-            className="p-1.5 rounded-md text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.05]"
+            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[#647169] hover:text-[#1B2520] hover:bg-[#EEF1ED] transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
             {errorMessage && (
               <div
                 role="alert"
-                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-start gap-2.5"
+                className="p-3.5 rounded-lg bg-[#FEE2E2] border border-[#FECACA] text-[#991B1B] text-xs flex items-start gap-2.5"
               >
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
-                <div className="flex-1">{errorMessage}</div>
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#B91C1C] mt-0.5" />
+                <div className="flex-1 font-medium">{errorMessage}</div>
               </div>
             )}
 
-            {/* Post Type */}
+            {/* Post Type Selector */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-[#94A3B8]">Category</label>
+              <label className="block text-xs font-semibold text-[#1B2520]">
+                Opportunity Category
+              </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {POST_TYPES.map((type) => (
                   <button
@@ -212,25 +219,30 @@ export function EditPostModal({
                     type="button"
                     onClick={() => setPostType(type.value)}
                     className={cn(
-                      "flex flex-col items-start p-2 rounded-lg border text-left text-xs transition-colors",
+                      "flex flex-col items-start p-2.5 rounded-lg border text-left transition-all min-h-[56px]",
                       postType === type.value
-                        ? "bg-blue-500/10 border-blue-500/30 text-[#F1F5F9]"
-                        : "bg-white/[0.02] border-white/[0.07] text-[#94A3B8] hover:border-white/[0.14] hover:text-[#F1F5F9]"
+                        ? "bg-[#E4EEE8] border-[#244C3B] text-[#183A2C] shadow-xs"
+                        : "bg-[#F8F9F6] border-[#E0E6DF] text-[#647169] hover:border-[#CADCD0] hover:bg-white"
                     )}
                   >
-                    <span className="font-semibold">{type.label}</span>
+                    <span className="text-xs font-semibold text-[#1B2520]">{type.label}</span>
+                    <span className="text-xs text-[#647169] line-clamp-1 mt-0.5">
+                      {type.desc}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Title */}
+            {/* Title Input */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <label htmlFor="edit-title" className="font-medium text-[#94A3B8]">
-                  Headline Title
+              <div className="flex items-center justify-between text-xs">
+                <label htmlFor="edit-title" className="font-semibold text-[#1B2520]">
+                  Headline Title <span className="text-[#B91C1C]">*</span>
                 </label>
-                <span className="font-mono text-[11px] text-[#64748B]">{title.length}/500</span>
+                <span className="font-mono text-xs text-[#87928A]">
+                  {title.length}/500
+                </span>
               </div>
               <input
                 id="edit-title"
@@ -239,33 +251,35 @@ export function EditPostModal({
                 maxLength={500}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-white/[0.08] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]"
+                className="w-full px-3.5 py-2.5 min-h-[44px] rounded-lg bg-white border border-[#E0E6DF] text-sm text-[#1B2520] placeholder-[#87928A] focus:outline-none focus:border-[#244C3B] focus:ring-1 focus:ring-[#244C3B] transition-colors"
               />
             </div>
 
-            {/* Content */}
+            {/* Content Body Input */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <label htmlFor="edit-content" className="font-medium text-[#94A3B8]">
-                  Content Body
+              <div className="flex items-center justify-between text-xs">
+                <label htmlFor="edit-content" className="font-semibold text-[#1B2520]">
+                  Opportunity Content Body <span className="text-[#B91C1C]">*</span>
                 </label>
-                <span className="font-mono text-[11px] text-[#64748B]">{content.length}/50,000</span>
+                <span className="font-mono text-xs text-[#87928A]">
+                  {content.length}/50,000
+                </span>
               </div>
               <textarea
                 id="edit-content"
                 required
-                rows={5}
+                rows={4}
                 maxLength={50000}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-white/[0.08] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6] resize-y"
+                className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-[#E0E6DF] text-sm text-[#1B2520] placeholder-[#87928A] focus:outline-none focus:border-[#244C3B] focus:ring-1 focus:ring-[#244C3B] transition-colors resize-y min-h-[120px]"
               />
             </div>
 
             {/* Target Industries */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-[#94A3B8]">
-                Target Industries
+              <label className="block text-xs font-semibold text-[#1B2520]">
+                Target Industries (Used for Relevance Routing)
               </label>
               <div className="flex gap-2">
                 <input
@@ -278,13 +292,13 @@ export function EditPostModal({
                       handleAddIndustry();
                     }
                   }}
-                  placeholder="e.g. fintech, logistics"
-                  className="flex-1 px-3 py-1.5 rounded-md bg-[#090B10] border border-white/[0.08] text-xs text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]"
+                  placeholder="e.g. fintech, logistics, energy"
+                  className="flex-1 px-3.5 py-2 min-h-[44px] rounded-lg bg-white border border-[#E0E6DF] text-sm text-[#1B2520] placeholder-[#87928A] focus:outline-none focus:border-[#244C3B]"
                 />
                 <button
                   type="button"
                   onClick={handleAddIndustry}
-                  className="px-3 py-1.5 rounded-md bg-[#141A26] hover:bg-[#1C2434] border border-white/[0.08] text-xs text-[#F1F5F9] flex items-center gap-1 font-medium"
+                  className="px-4 py-2 min-h-[44px] rounded-lg bg-[#F8F9F6] hover:bg-[#EEF1ED] border border-[#E0E6DF] text-xs text-[#1B2520] flex items-center gap-1 font-semibold transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -295,13 +309,14 @@ export function EditPostModal({
                   {targetIndustries.map((ind) => (
                     <span
                       key={ind}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-500/10 text-[#93C5FD] border border-blue-500/20 text-xs font-mono"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#EEF1ED] text-[#24493D] border border-[#E0E6DF] text-xs font-mono"
                     >
                       <span>{ind}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveIndustry(ind)}
-                        className="hover:text-red-400"
+                        aria-label={`Remove industry ${ind}`}
+                        className="min-w-[20px] min-h-[20px] flex items-center justify-center rounded hover:bg-[#E0E6DF] text-[#647169] hover:text-[#B91C1C]"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -313,7 +328,9 @@ export function EditPostModal({
 
             {/* Relevance Tags */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-[#94A3B8]">Relevance Tags</label>
+              <label className="block text-xs font-semibold text-[#1B2520]">
+                Relevance Tags
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -325,13 +342,13 @@ export function EditPostModal({
                       handleAddTag();
                     }
                   }}
-                  placeholder="e.g. liquidity, cross-border"
-                  className="flex-1 px-3 py-1.5 rounded-md bg-[#090B10] border border-white/[0.08] text-xs text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]"
+                  placeholder="e.g. liquidity, cross-border, compliance"
+                  className="flex-1 px-3.5 py-2 min-h-[44px] rounded-lg bg-white border border-[#E0E6DF] text-sm text-[#1B2520] placeholder-[#87928A] focus:outline-none focus:border-[#244C3B]"
                 />
                 <button
                   type="button"
                   onClick={handleAddTag}
-                  className="px-3 py-1.5 rounded-md bg-[#141A26] hover:bg-[#1C2434] border border-white/[0.08] text-xs text-[#F1F5F9] flex items-center gap-1 font-medium"
+                  className="px-4 py-2 min-h-[44px] rounded-lg bg-[#F8F9F6] hover:bg-[#EEF1ED] border border-[#E0E6DF] text-xs text-[#1B2520] flex items-center gap-1 font-semibold transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -342,14 +359,15 @@ export function EditPostModal({
                   {tags.map((t) => (
                     <span
                       key={t}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/[0.03] text-[#94A3B8] border border-white/[0.07] text-xs font-mono"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#F8F9F6] text-[#647169] border border-[#E0E6DF] text-xs font-mono"
                     >
-                      <TagIcon className="w-3 h-3 text-[#475569]" />
+                      <TagIcon className="w-3 h-3 text-[#87928A]" />
                       <span>{t}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(t)}
-                        className="hover:text-red-400"
+                        aria-label={`Remove tag ${t}`}
+                        className="min-w-[20px] min-h-[20px] flex items-center justify-center rounded hover:bg-[#E0E6DF] text-[#647169] hover:text-[#B91C1C]"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -359,9 +377,9 @@ export function EditPostModal({
               )}
             </div>
 
-            {/* Expiration */}
+            {/* Expiration (Optional) */}
             <div className="space-y-1.5">
-              <label htmlFor="edit-expires-at" className="block text-xs font-medium text-[#94A3B8]">
+              <label htmlFor="edit-expires-at" className="block text-xs font-semibold text-[#1B2520]">
                 Expiration Date & Time (Optional UTC)
               </label>
               <input
@@ -369,24 +387,28 @@ export function EditPostModal({
                 type="datetime-local"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
-                className="px-3 py-1.5 rounded-lg bg-[#090B10] border border-white/[0.08] text-xs text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]"
+                className="px-3.5 py-2 min-h-[44px] rounded-lg bg-white border border-[#E0E6DF] text-xs text-[#1B2520] focus:outline-none focus:border-[#244C3B]"
               />
+              <p className="text-xs text-[#647169]">
+                Expired opportunities are automatically omitted from discovery feeds and reject new autonomous comments.
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-white/[0.08] bg-[#0E131C] shrink-0">
+          {/* Sticky Footer Actions */}
+          <div className="flex items-center justify-end gap-3 px-6 py-3.5 border-t border-[#E0E6DF] bg-[#F8F9F6] shrink-0">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.04]"
+              className="px-4 py-2 min-h-[44px] rounded-lg text-xs font-medium text-[#647169] hover:text-[#1B2520] hover:bg-[#EEF1ED] transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold shadow-sm disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 min-h-[44px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

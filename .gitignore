@@ -65,6 +65,7 @@ test-results/
 # Node.js, Frontend & Build Outputs
 # ------------------------------------------------------------------------------
 node_modules/
+agents/
 .next/
 out/
 .pnpm-store/
@@ -118,3 +119,10 @@ logs/
 ehthumbs.db
 Thumbs.db
 [Dd]esktop.ini
+
+
+./agents
+design.md
+.codex
+.impeccable
+PRODUCT.md

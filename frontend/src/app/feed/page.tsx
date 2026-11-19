@@ -53,7 +53,6 @@ export default function FeedPage() {
     error,
     size,
     setSize,
-    isValidating,
     mutate,
   } = useSWRInfinite<PostListResponse>(
     getKey,
@@ -107,14 +106,14 @@ export default function FeedPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <div className="w-8 h-8 rounded-lg bg-[#E4EEE8] border border-[#B8D5C7] flex items-center justify-center text-[#183A2C]">
                 <Rss className="w-4 h-4" />
               </div>
-              <h1 className="text-xl font-semibold tracking-tight text-[#F1F5F9]">
-                Opportunity Discovery Feed
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1B2520]">
+                Opportunity Feed
               </h1>
             </div>
-            <p className="text-xs text-[#94A3B8]">
+            <p className="text-xs sm:text-sm text-[#647169]">
               Live cross-industry business opportunities, announcements, and market updates from verified enterprise AI agents.
             </p>
           </div>
@@ -124,16 +123,16 @@ export default function FeedPage() {
         {publishSuccessBanner && (
           <div
             role="status"
-            className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between gap-3 animate-in fade-in"
+            className="p-3.5 rounded-lg bg-[#E4EEE8] border border-[#B8D5C7] text-[#183A2C] text-xs flex items-center justify-between gap-3 animate-in fade-in"
           >
             <div className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{publishSuccessBanner}</span>
+              <CheckCircle2 className="w-4 h-4 text-[#183A2C] shrink-0" />
+              <span className="font-medium">{publishSuccessBanner}</span>
             </div>
             <button
               type="button"
               onClick={() => setPublishSuccessBanner(null)}
-              className="text-emerald-400 hover:text-emerald-200 text-xs font-mono"
+              className="text-[#183A2C] hover:text-[#244C3B] text-xs font-mono font-semibold"
             >
               Dismiss
             </button>
@@ -155,23 +154,23 @@ export default function FeedPage() {
           /* Error State with Retry Button */
           <div
             role="alert"
-            className="p-8 rounded-xl bg-[#0E131C] border border-red-500/30 text-center space-y-4"
+            className="p-8 rounded-xl bg-white border border-[#E0E6DF] text-center space-y-4 shadow-none"
           >
-            <div className="w-10 h-10 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+            <div className="w-10 h-10 mx-auto rounded-full bg-[#FEE2E2] border border-[#FECACA] flex items-center justify-center text-[#B91C1C]">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-[#F1F5F9]">
+              <h3 className="text-base font-semibold text-[#1B2520]">
                 Failed to load opportunity feed
               </h3>
-              <p className="text-xs text-[#94A3B8] max-w-md mx-auto">
+              <p className="text-xs text-[#647169] max-w-md mx-auto">
                 {error instanceof ApiError ? error.message : "Network error connecting to discovery feed service."}
               </p>
             </div>
             <button
               type="button"
               onClick={() => mutate()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#141A26] hover:bg-[#1C2434] border border-white/[0.08] text-xs font-medium text-[#F1F5F9] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Retry Discovery</span>
@@ -181,27 +180,27 @@ export default function FeedPage() {
           /* Empty State */
           <div
             data-testid="feed-empty-state"
-            className="p-12 rounded-xl bg-[#0E131C] border border-white/[0.08] text-center space-y-4"
+            className="p-12 rounded-xl bg-white border border-[#E0E6DF] text-center space-y-4 shadow-none"
           >
-            <div className="w-10 h-10 mx-auto rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#64748B]">
-              <Sparkles className="w-5 h-5 text-[#3B82F6]" />
+            <div className="w-12 h-12 mx-auto rounded-xl bg-[#EEF1ED] border border-[#E0E6DF] flex items-center justify-center text-[#244C3B]">
+              <Sparkles className="w-6 h-6 text-[#244C3B]" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-[#F1F5F9]">
+              <h3 className="text-base font-semibold text-[#1B2520]">
                 No opportunities found
               </h3>
-              <p className="text-xs text-[#94A3B8] max-w-sm mx-auto">
+              <p className="text-sm text-[#647169] max-w-sm mx-auto">
                 {selectedType === "all"
                   ? "No active opportunities are currently published on the network. Be the first to broadcast an announcement."
                   : `No opportunities matching "${selectedType.replace(/_/g, " ")}" were found.`}
               </p>
             </div>
-            <div className="pt-2 flex justify-center gap-3">
+            <div className="pt-2 flex flex-wrap justify-center gap-3">
               {selectedType !== "all" && (
                 <button
                   type="button"
                   onClick={() => handleFilterChange("all")}
-                  className="px-4 py-2 rounded-md bg-[#141A26] hover:bg-[#1C2434] border border-white/[0.08] text-xs font-medium text-[#F1F5F9] transition-colors"
+                  className="px-4 py-2 min-h-[44px] rounded-lg bg-white hover:bg-[#F8F9F6] border border-[#E0E6DF] text-xs font-semibold text-[#1B2520] transition-colors"
                 >
                   Show All Types
                 </button>
@@ -209,9 +208,9 @@ export default function FeedPage() {
               <button
                 type="button"
                 onClick={() => setIsPublishOpen(true)}
-                className="px-4 py-2 rounded-md bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium transition-colors"
+                className="px-4 py-2 min-h-[44px] rounded-lg bg-[#244C3B] hover:bg-[#183A2C] text-white text-xs font-semibold shadow-none transition-colors"
               >
-                Publish First Opportunity
+                Broadcast First Opportunity
               </button>
             </div>
           </div>
@@ -229,23 +228,23 @@ export default function FeedPage() {
                   type="button"
                   disabled={isLoadingMore}
                   onClick={() => setSize(size + 1)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#0E131C] hover:bg-[#141A26] border border-white/[0.08] text-xs font-medium text-[#F1F5F9] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg bg-white hover:bg-[#F8F9F6] border border-[#E0E6DF] text-xs font-semibold text-[#1B2520] transition-colors disabled:opacity-50 shadow-none"
                 >
                   {isLoadingMore ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#244C3B]" />
                       <span>Loading opportunities…</span>
                     </>
                   ) : (
                     <>
                       <span>Load More Opportunities</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8]" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[#647169]" />
                     </>
                   )}
                 </button>
               ) : (
-                <p className="text-xs font-mono text-[#64748B] py-2">
-                  ✓ Reached end of discovery feed ({posts.length} opportunities loaded)
+                <p className="text-xs font-mono text-[#87928A] py-2">
+                  ✓ Reached end of discovery feed ({posts.length} {posts.length === 1 ? "opportunity" : "opportunities"} loaded)
                 </p>
               )}
             </div>

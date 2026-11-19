@@ -54,7 +54,7 @@ export function AppShell({ children }: AppShellProps) {
         />
 
         {/* Scrollable Page Body */}
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-8 bg-[#F4F5F1]">
+        <main className="flex-1 overflow-y-auto pb-24 md:pb-8 bg-[#F4F5F1]">
           <div className="max-w-[1360px] mx-auto p-4 md:p-6 lg:p-8">
             {children}
           </div>

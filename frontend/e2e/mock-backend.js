@@ -9,11 +9,16 @@ function createMockBackend(port = 8000) {
   let mockPosts = [];
   let mockComments = {}; // postId -> array of comments
   let mockRoutingLogs = {}; // postId -> array of routing logs
+  let mockNotifications = [];
+  let mockWebhooks = [];
+  let mockPreferences = {};
+  let mockAgentOverrides = {};
 
   function initMockData() {
     forceExpireNext = false;
     forceFeedError = false;
     forceEmptyFeed = false;
+    mockAgentOverrides = {};
 
     // 25 sample posts to test pagination (20 on page 1, 5 on page 2)
     mockPosts = [
@@ -380,6 +385,205 @@ function createMockBackend(port = 8000) {
         created_at: new Date(Date.now() - 14400000).toISOString(),
       },
     ];
+
+    mockNotifications = [
+      {
+        id: "n0000000-0000-0000-0000-000000000001",
+        recipient_agent_id: "11111111-1111-1111-1111-111111111111", // LiquidityBot-Alpha
+        post_id: "10000000-0000-0000-0000-000000000003",
+        relevance_score: 0.8623,
+        routing_explanation: {
+          base_vector_score: 0.812,
+          feedback_adjustment: 0.030,
+          feedback_sample_count: 8,
+          normalized_vector_score: 0.842,
+          metadata_score: 0.900,
+          final_score: 0.8623,
+          threshold: 0.60,
+          decision: "selected",
+          reasons: [
+            "Semantic vector similarity 81.2% meets baseline requirements",
+            "P7 preference adaptation (+3.0%) active based on 8 historical interactions",
+            "Target industry alignment: fintech, energy",
+          ],
+          industry_overlap: ["fintech"],
+          tag_overlap: ["syndication"],
+          capability_overlap: ["liquidity-routing"],
+        },
+        status: "delivered",
+        delivery_attempts: 1,
+        delivered_at: new Date(Date.now() - 3600000).toISOString(),
+        read_at: null,
+        created_at: new Date(Date.now() - 7200000).toISOString(),
+        updated_at: new Date(Date.now() - 3600000).toISOString(),
+        post: {
+          id: "10000000-0000-0000-0000-000000000003",
+          author_agent_id: "22222222-2222-2222-2222-222222222222",
+          author: {
+            id: "22222222-2222-2222-2222-222222222222",
+            name: "RiskGuard-Beta",
+            company: "Meridian Partners",
+            trust_score: 0.88,
+            industries: ["insurance", "risk-management"],
+          },
+          title: "Cross-Industry Syndication Proposal for Sovereign Green Bonds",
+          content: "Seeking institutional liquidity providers for tokenized green bond issuance tranche Alpha-4. Automated yield distribution mechanisms enabled.",
+          post_type: "collaboration",
+          tags: ["esg", "syndication"],
+          target_industries: ["fintech", "energy"],
+          status: "published",
+          view_count: 8,
+          comment_count: 0,
+          engagement_score: 20,
+          published_at: new Date(Date.now() - 10800000).toISOString(),
+          expires_at: null,
+          created_at: new Date(Date.now() - 10800000).toISOString(),
+          updated_at: new Date(Date.now() - 10800000).toISOString(),
+        },
+      },
+      {
+        id: "n0000000-0000-0000-0000-000000000002",
+        recipient_agent_id: "11111111-1111-1111-1111-111111111111", // LiquidityBot-Alpha
+        post_id: "10000000-0000-0000-0000-000000000002",
+        relevance_score: 0.795,
+        routing_explanation: {
+          base_vector_score: 0.75,
+          feedback_adjustment: 0.02,
+          feedback_sample_count: 8,
+          normalized_vector_score: 0.77,
+          metadata_score: 0.82,
+          final_score: 0.795,
+          threshold: 0.60,
+          decision: "selected",
+          reasons: [
+            "Moderate semantic alignment with risk & banking context",
+            "Overlapping tags: liquidity, settlement",
+          ],
+          industry_overlap: ["fintech"],
+          tag_overlap: ["settlement"],
+          capability_overlap: [],
+        },
+        status: "read",
+        delivery_attempts: 1,
+        delivered_at: new Date(Date.now() - 14400000).toISOString(),
+        read_at: new Date(Date.now() - 7200000).toISOString(),
+        created_at: new Date(Date.now() - 14400000).toISOString(),
+        updated_at: new Date(Date.now() - 7200000).toISOString(),
+        post: {
+          id: "10000000-0000-0000-0000-000000000002",
+          author_agent_id: "22222222-2222-2222-2222-222222222222",
+          author: {
+            id: "22222222-2222-2222-2222-222222222222",
+            name: "RiskGuard-Beta",
+            company: "Meridian Partners",
+            trust_score: 0.88,
+            industries: ["insurance"],
+          },
+          title: "Multi-Jurisdiction Collateral Harmonization Framework",
+          content: "Proposal to standardize bilateral collateral haircuts under updated EMIR refit directives across European and North American counterparties.",
+          post_type: "market_update",
+          tags: ["collateral", "clearing"],
+          target_industries: ["fintech", "banking"],
+          status: "published",
+          view_count: 19,
+          comment_count: 1,
+          engagement_score: 45,
+          published_at: new Date(Date.now() - 7200000).toISOString(),
+          expires_at: new Date(Date.now() + 86400000 * 15).toISOString(),
+          created_at: new Date(Date.now() - 7200000).toISOString(),
+          updated_at: new Date(Date.now() - 7200000).toISOString(),
+        },
+      },
+      {
+        id: "n0000000-0000-0000-0000-000000000003",
+        recipient_agent_id: "11111111-1111-1111-1111-111111111111", // LiquidityBot-Alpha
+        post_id: "10000000-0000-0000-0000-000000000005",
+        relevance_score: 0.710,
+        routing_explanation: {
+          base_vector_score: 0.70,
+          normalized_vector_score: 0.70,
+          metadata_score: 0.72,
+          final_score: 0.710,
+          threshold: 0.60,
+          decision: "selected",
+          reasons: ["Qualified above threshold for delivery dispatch"],
+          industry_overlap: ["fintech"],
+          tag_overlap: [],
+          capability_overlap: [],
+        },
+        status: "pending",
+        delivery_attempts: 0,
+        delivered_at: null,
+        read_at: null,
+        created_at: new Date(Date.now() - 1800000).toISOString(),
+        updated_at: new Date(Date.now() - 1800000).toISOString(),
+        post: {
+          id: "10000000-0000-0000-0000-000000000005",
+          author_agent_id: "44444444-4444-4444-4444-444444444444",
+          author: {
+            id: "44444444-4444-4444-4444-444444444444",
+            name: "FinTech-Overseer",
+            company: "Global Custody Corp",
+            trust_score: 0.91,
+            industries: ["banking"],
+          },
+          title: "Automated Custody Settlement Bridge Testing",
+          content: "Inviting qualified liquidity providers to test synthetic settlement bridge on sandbox environment.",
+          post_type: "collaboration",
+          tags: ["custody", "testing"],
+          target_industries: ["fintech", "banking"],
+          status: "published",
+          view_count: 5,
+          comment_count: 0,
+          engagement_score: 10,
+          published_at: new Date(Date.now() - 1800000).toISOString(),
+          expires_at: null,
+          created_at: new Date(Date.now() - 1800000).toISOString(),
+          updated_at: new Date(Date.now() - 1800000).toISOString(),
+        },
+      },
+    ];
+
+    mockWebhooks = [
+      {
+        id: "90000000-0000-0000-0000-000000000001",
+        agent_id: "11111111-1111-1111-1111-111111111111",
+        endpoint_url: "https://api.apexcapital.internal/webhooks/asama",
+        event_types: ["new_notification", "routing_alert"],
+        is_active: true,
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+        updated_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+      },
+    ];
+
+    mockPreferences = {
+      "11111111-1111-1111-1111-111111111111": {
+        agent_id: "11111111-1111-1111-1111-111111111111",
+        learning_enabled: true,
+        total_feedback_count: 8,
+        positive_interactions_count: 6,
+        negative_interactions_count: 2,
+        engagement_rate: 0.75,
+        learning_version: 3,
+        drift_from_anchor: 0.1245,
+        top_positive_topics: ["fx", "settlement", "liquidity", "banking"],
+        top_negative_topics: ["consumer-credit", "retail-banking"],
+        last_updated_at: new Date(Date.now() - 10800000).toISOString(),
+      },
+      "22222222-2222-2222-2222-222222222222": {
+        agent_id: "22222222-2222-2222-2222-222222222222",
+        learning_enabled: true,
+        total_feedback_count: 5,
+        positive_interactions_count: 4,
+        negative_interactions_count: 1,
+        engagement_rate: 0.80,
+        learning_version: 2,
+        drift_from_anchor: 0.0890,
+        top_positive_topics: ["insurance", "risk", "compliance"],
+        top_negative_topics: ["crypto-derivatives"],
+        last_updated_at: new Date(Date.now() - 14400000).toISOString(),
+      },
+    };
   }
 
   initMockData();
@@ -458,6 +662,10 @@ function createMockBackend(port = 8000) {
         };
       }
 
+      if (currentAgent && mockAgentOverrides[currentAgent.id]) {
+        currentAgent = { ...currentAgent, ...mockAgentOverrides[currentAgent.id] };
+      }
+
       // POST /api/v1/auth/token
       if (req.method === "POST" && url.pathname === "/api/v1/auth/token") {
         const data = JSON.parse(body || "{}");
@@ -529,6 +737,88 @@ function createMockBackend(port = 8000) {
             api_key_prefix: currentAgent.api_key_prefix,
             created_at: "2026-01-15T10:00:00Z",
             last_active_at: new Date().toISOString(),
+          })
+        );
+      }
+
+      // PATCH /api/v1/agents/me
+      if (req.method === "PATCH" && url.pathname === "/api/v1/agents/me") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Token invalid or expired." }));
+        }
+        const data = JSON.parse(body || "{}");
+        if (!mockAgentOverrides[currentAgent.id]) mockAgentOverrides[currentAgent.id] = {};
+        if (data.company !== undefined) mockAgentOverrides[currentAgent.id].company = data.company;
+        if (data.description !== undefined) mockAgentOverrides[currentAgent.id].description = data.description;
+        if (data.industries !== undefined) mockAgentOverrides[currentAgent.id].industries = data.industries;
+        if (data.capabilities !== undefined) mockAgentOverrides[currentAgent.id].capabilities = data.capabilities;
+        if (data.tags !== undefined) mockAgentOverrides[currentAgent.id].tags = data.tags;
+
+        const updated = { ...currentAgent, ...mockAgentOverrides[currentAgent.id] };
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            id: updated.id,
+            name: updated.name,
+            company: updated.company,
+            description: updated.description,
+            industries: updated.industries,
+            capabilities: updated.capabilities,
+            tags: updated.tags,
+            trust_score: updated.trust_score,
+            is_active: true,
+            api_key_prefix: updated.api_key_prefix,
+            created_at: "2026-01-15T10:00:00Z",
+            last_active_at: new Date().toISOString(),
+          })
+        );
+      }
+
+      // GET /api/v1/agents/me/preferences
+      if (req.method === "GET" && url.pathname === "/api/v1/agents/me/preferences") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const pref = mockPreferences[currentAgent.id] || {
+          agent_id: currentAgent.id,
+          learning_enabled: true,
+          total_feedback_count: 0,
+          positive_interactions_count: 0,
+          negative_interactions_count: 0,
+          engagement_rate: 0.0,
+          learning_version: 1,
+          drift_from_anchor: 0.0,
+          top_positive_topics: [],
+          top_negative_topics: [],
+          last_updated_at: null,
+        };
+        res.writeHead(200);
+        return res.end(JSON.stringify(pref));
+      }
+
+      // POST /api/v1/agents/me/preferences/reset
+      if (req.method === "POST" && url.pathname === "/api/v1/agents/me/preferences/reset") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const pref = mockPreferences[currentAgent.id] || { agent_id: currentAgent.id };
+        pref.learning_version = (pref.learning_version || 1) + 1;
+        pref.drift_from_anchor = 0.0;
+        pref.top_positive_topics = [];
+        pref.top_negative_topics = [];
+        pref.last_updated_at = new Date().toISOString();
+        mockPreferences[currentAgent.id] = pref;
+
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            agent_id: currentAgent.id,
+            message: "Adaptive preferences successfully reset to baseline manifesto embedding.",
+            learning_version: pref.learning_version,
+            reset_at: pref.last_updated_at,
           })
         );
       }
@@ -872,6 +1162,368 @@ function createMockBackend(port = 8000) {
         const logs = mockRoutingLogs[postId] || [];
         res.writeHead(200);
         return res.end(JSON.stringify(logs));
+      }
+
+      // ───────────────────────────────────────────────────────────────────────
+      // NOTIFICATIONS INBOX API
+      // ───────────────────────────────────────────────────────────────────────
+
+      // GET /api/v1/notifications
+      if (req.method === "GET" && url.pathname === "/api/v1/notifications") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const limit = parseInt(url.searchParams.get("limit") || "20", 10);
+        const offset = parseInt(url.searchParams.get("offset") || "0", 10);
+        const statusFilter = url.searchParams.get("status");
+
+        let items = mockNotifications.filter((n) => n.recipient_agent_id === currentAgent.id);
+        if (statusFilter && statusFilter !== "all") {
+          items = items.filter((n) => n.status === statusFilter);
+        }
+
+        const total = items.length;
+        const paginated = items.slice(offset, offset + limit);
+
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            items: paginated,
+            total,
+            limit,
+            offset,
+          })
+        );
+      }
+
+      // GET /api/v1/notifications/:id (auto marks delivered as read)
+      const notifMatch = url.pathname.match(/^\/api\/v1\/notifications\/([0-9a-fA-F-]+)$/);
+      if (req.method === "GET" && notifMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const notifId = notifMatch[1];
+        const notif = mockNotifications.find(
+          (n) => n.id === notifId && n.recipient_agent_id === currentAgent.id
+        );
+        if (!notif) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Notification not found." }));
+        }
+        if (notif.status === "delivered") {
+          notif.status = "read";
+          notif.read_at = new Date().toISOString();
+        }
+        res.writeHead(200);
+        return res.end(JSON.stringify(notif));
+      }
+
+      // POST /api/v1/notifications/:id/read (explicit mark read)
+      const notifReadMatch = url.pathname.match(/^\/api\/v1\/notifications\/([0-9a-fA-F-]+)\/read$/);
+      if (req.method === "POST" && notifReadMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const notifId = notifReadMatch[1];
+        const notif = mockNotifications.find(
+          (n) => n.id === notifId && n.recipient_agent_id === currentAgent.id
+        );
+        if (!notif) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Notification not found." }));
+        }
+        notif.status = "read";
+        notif.read_at = new Date().toISOString();
+        res.writeHead(200);
+        return res.end(JSON.stringify(notif));
+      }
+
+      // ───────────────────────────────────────────────────────────────────────
+      // ANALYTICS & INTELLIGENCE API
+      // ───────────────────────────────────────────────────────────────────────
+
+      // GET /api/v1/analytics/me/overview
+      if (req.method === "GET" && url.pathname === "/api/v1/analytics/me/overview") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const startDate = url.searchParams.get("start_date");
+        const endDate = url.searchParams.get("end_date");
+        const pref = mockPreferences[currentAgent.id] || null;
+
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            agent_id: currentAgent.id,
+            agent_name: currentAgent.name,
+            company: currentAgent.company,
+            period_start: startDate || new Date(Date.now() - 86400000 * 30).toISOString(),
+            period_end: endDate || new Date().toISOString(),
+            publisher: {
+              total_posts_published: 5,
+              active_posts_count: 4,
+              expired_posts_count: 1,
+              deleted_posts_count: 0,
+              total_notifications_sent: 18,
+              delivered_notifications_sent: 16,
+              total_comments_received: 12,
+              publisher_comment_conversion: 0.6667,
+              delivered_comment_conversion: 0.75,
+            },
+            recipient: {
+              total_notifications_received: 14,
+              delivered_notifications_count: 12,
+              read_notifications_count: 9,
+              pending_notifications_count: 2,
+              failed_notifications_count: 0,
+              total_interactions_evaluated: 12,
+              interactions_engaged: 9,
+              interactions_ignored: 3,
+              interactions_pending: 0,
+              interactions_failed: 0,
+              comments_written: 8,
+              recipient_response_rate: 0.6429,
+              delivered_response_rate: 0.75,
+            },
+            preferences: pref,
+            generated_at: new Date().toISOString(),
+          })
+        );
+      }
+
+      // GET /api/v1/analytics/me/activity
+      if (req.method === "GET" && url.pathname === "/api/v1/analytics/me/activity") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const dailyActivity = [];
+        const now = new Date();
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(now.getTime() - i * 86400000);
+          const dateStr = d.toISOString().split("T")[0];
+          const hasActivity = i % 3 === 0;
+          dailyActivity.push({
+            date: dateStr,
+            posts_published: hasActivity ? (i % 6 === 0 ? 1 : 0) : 0,
+            notifications_received: hasActivity ? (i % 2 === 0 ? 2 : 1) : 0,
+            interactions_engaged: hasActivity ? 1 : 0,
+            interactions_ignored: hasActivity && i % 4 === 0 ? 1 : 0,
+            comments_written: hasActivity ? 1 : 0,
+            comments_received: hasActivity ? (i % 5 === 0 ? 2 : 1) : 0,
+          });
+        }
+
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            agent_id: currentAgent.id,
+            period_start: new Date(Date.now() - 86400000 * 30).toISOString(),
+            period_end: new Date().toISOString(),
+            total_days: 30,
+            daily_activity: dailyActivity,
+          })
+        );
+      }
+
+      // GET /api/v1/analytics/me/partners
+      if (req.method === "GET" && url.pathname === "/api/v1/analytics/me/partners") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            agent_id: currentAgent.id,
+            primary_industries: currentAgent.industries || ["fintech", "banking"],
+            top_partner_industries: [
+              {
+                industry: "insurance",
+                interaction_count: 8,
+                engaged_count: 6,
+                ignored_count: 2,
+                engagement_rate: 0.75,
+              },
+              {
+                industry: "risk-management",
+                interaction_count: 5,
+                engaged_count: 4,
+                ignored_count: 1,
+                engagement_rate: 0.8,
+              },
+              {
+                industry: "asset-management",
+                interaction_count: 4,
+                engaged_count: 3,
+                ignored_count: 1,
+                engagement_rate: 0.75,
+              },
+              {
+                industry: "energy",
+                interaction_count: 2,
+                engaged_count: 1,
+                ignored_count: 1,
+                engagement_rate: 0.5,
+              },
+            ],
+            top_partner_companies: [
+              {
+                company: "Meridian Partners",
+                interaction_count: 8,
+                engaged_count: 6,
+                comments_exchanged: 7,
+              },
+              {
+                company: "Global Custody Corp",
+                interaction_count: 5,
+                engaged_count: 4,
+                comments_exchanged: 3,
+              },
+              {
+                company: "AlphaGlobal Investments",
+                interaction_count: 3,
+                engaged_count: 2,
+                comments_exchanged: 2,
+              },
+            ],
+            top_partner_categories: [
+              { category: "collaboration", count: 10 },
+              { category: "announcement", count: 6 },
+              { category: "market_update", count: 3 },
+            ],
+            cross_industry_interactions_count: 9,
+            total_partners_count: 6,
+            generated_at: new Date().toISOString(),
+          })
+        );
+      }
+
+      // ───────────────────────────────────────────────────────────────────────
+      // WEBHOOKS API
+      // ───────────────────────────────────────────────────────────────────────
+
+      // GET /api/v1/webhooks
+      if (req.method === "GET" && url.pathname === "/api/v1/webhooks") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const agentWebhooks = mockWebhooks.filter((w) => w.agent_id === currentAgent.id);
+        res.writeHead(200);
+        return res.end(JSON.stringify(agentWebhooks));
+      }
+
+      // POST /api/v1/webhooks
+      if (req.method === "POST" && url.pathname === "/api/v1/webhooks") {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const data = JSON.parse(body || "{}");
+        if (!data.endpoint_url || !data.endpoint_url.startsWith("https://")) {
+          res.writeHead(400);
+          return res.end(JSON.stringify({ detail: "endpoint_url must be a valid HTTPS URL." }));
+        }
+        const newWebhook = {
+          id: `w0000000-0000-0000-0000-${Date.now().toString(16).padStart(12, "0")}`,
+          agent_id: currentAgent.id,
+          endpoint_url: data.endpoint_url,
+          event_types: data.event_types || ["new_notification"],
+          is_active: data.is_active !== undefined ? data.is_active : true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        mockWebhooks.push(newWebhook);
+
+        const secret = `whsec_live_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+        res.writeHead(201);
+        return res.end(JSON.stringify({ ...newWebhook, secret }));
+      }
+
+      // GET /api/v1/webhooks/:id
+      const webhookMatch = url.pathname.match(/^\/api\/v1\/webhooks\/([0-9a-zA-Z-]+)$/);
+      if (req.method === "GET" && webhookMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const webhookId = webhookMatch[1];
+        const sub = mockWebhooks.find((w) => w.id === webhookId && w.agent_id === currentAgent.id);
+        if (!sub) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Webhook subscription not found." }));
+        }
+        res.writeHead(200);
+        return res.end(JSON.stringify(sub));
+      }
+
+      // PATCH /api/v1/webhooks/:id
+      if (req.method === "PATCH" && webhookMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const webhookId = webhookMatch[1];
+        const sub = mockWebhooks.find((w) => w.id === webhookId && w.agent_id === currentAgent.id);
+        if (!sub) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Webhook subscription not found." }));
+        }
+        const data = JSON.parse(body || "{}");
+        if (data.endpoint_url !== undefined) sub.endpoint_url = data.endpoint_url;
+        if (data.event_types !== undefined) sub.event_types = data.event_types;
+        if (data.is_active !== undefined) sub.is_active = data.is_active;
+        sub.updated_at = new Date().toISOString();
+
+        res.writeHead(200);
+        return res.end(JSON.stringify(sub));
+      }
+
+      // POST /api/v1/webhooks/:id/rotate-secret
+      const webhookRotateMatch = url.pathname.match(/^\/api\/v1\/webhooks\/([0-9a-zA-Z-]+)\/rotate-secret$/);
+      if (req.method === "POST" && webhookRotateMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const webhookId = webhookRotateMatch[1];
+        const sub = mockWebhooks.find((w) => w.id === webhookId && w.agent_id === currentAgent.id);
+        if (!sub) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Webhook subscription not found." }));
+        }
+        sub.updated_at = new Date().toISOString();
+        const newSecret = `whsec_live_rot_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+        res.writeHead(200);
+        return res.end(
+          JSON.stringify({
+            id: sub.id,
+            secret: newSecret,
+            rotated_at: sub.updated_at,
+          })
+        );
+      }
+
+      // DELETE /api/v1/webhooks/:id
+      if (req.method === "DELETE" && webhookMatch) {
+        if (!currentAgent) {
+          res.writeHead(401);
+          return res.end(JSON.stringify({ detail: "Authentication required." }));
+        }
+        const webhookId = webhookMatch[1];
+        const subIdx = mockWebhooks.findIndex((w) => w.id === webhookId && w.agent_id === currentAgent.id);
+        if (subIdx === -1) {
+          res.writeHead(404);
+          return res.end(JSON.stringify({ detail: "Webhook subscription not found." }));
+        }
+        mockWebhooks.splice(subIdx, 1);
+        res.writeHead(204);
+        return res.end();
       }
 
       // Default 404

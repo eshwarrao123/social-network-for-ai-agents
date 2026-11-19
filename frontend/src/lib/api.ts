@@ -1,7 +1,9 @@
 /**
  * Typed client for same-origin BFF API requests.
  * All requests route to Next.js BFF proxy (/api/v1/*) — credentials (HttpOnly cookie)
- * are managed automatically by the browser. Zero secrets in JavaScript memory or storage.
+ * are managed automatically by the browser. Session tokens are never stored in JavaScript memory
+ * or browser storage; one-time API keys and webhook signing secrets exist strictly in transient
+ * React state during deliberate user reveal.
  */
 
 export class ApiError extends Error {

@@ -369,3 +369,140 @@ export interface PaginatedResponse<T> {
 export interface ApiErrorResponse {
   detail: string | { message?: string; [key: string]: unknown };
 }
+
+// --- P9.3 Workspace Experience Schemas ---
+
+// Inbound Notification Inbox
+export interface NotificationAuthorSummary {
+  id: UUID;
+  name: string;
+  company: string;
+  trust_score: number;
+  industries?: string[];
+}
+
+export interface NotificationPostSummary {
+  id: UUID;
+  author_agent_id: UUID;
+  author?: NotificationAuthorSummary | null;
+  title: string;
+  content: string;
+  post_type: string;
+  tags: string[];
+  target_industries: string[];
+  status: string;
+  view_count: number;
+  comment_count: number;
+  engagement_score: number;
+  published_at?: string | null;
+  expires_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface NotificationInboxItem {
+  id: UUID;
+  recipient_agent_id: UUID;
+  post_id: UUID;
+  relevance_score: number;
+  routing_explanation: Record<string, unknown>;
+  status: "pending" | "delivered" | "read" | "failed";
+  delivery_attempts: number;
+  delivered_at?: string | null;
+  read_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  post?: NotificationPostSummary | null;
+}
+
+export interface NotificationInboxResponse {
+  items: NotificationInboxItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+// Activity Analytics
+export interface AgentActivityBucket {
+  date: string;
+  posts_published: number;
+  notifications_received: number;
+  interactions_engaged: number;
+  interactions_ignored: number;
+  comments_written: number;
+  comments_received: number;
+}
+
+export interface AgentActivityResponse {
+  agent_id: UUID;
+  period_start: string;
+  period_end: string;
+  total_days: number;
+  daily_activity: AgentActivityBucket[];
+}
+
+// Partner Synergy & Cross-Company Intelligence
+export interface PartnerIndustryInsight {
+  industry: string;
+  interaction_count: number;
+  engaged_count: number;
+  ignored_count: number;
+  engagement_rate: number;
+}
+
+export interface PartnerCompanyInsight {
+  company: string;
+  interaction_count: number;
+  engaged_count: number;
+  comments_exchanged: number;
+}
+
+export interface AgentPartnershipInsights {
+  agent_id: UUID;
+  primary_industries: string[];
+  top_partner_industries: PartnerIndustryInsight[];
+  top_partner_companies: PartnerCompanyInsight[];
+  top_partner_categories: Array<Record<string, unknown>>;
+  cross_industry_interactions_count: number;
+  total_partners_count: number;
+  generated_at: string;
+}
+
+// Webhooks & Settings
+export interface WebhookSubscription {
+  id: UUID;
+  agent_id: UUID;
+  endpoint_url: string;
+  event_types: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookSubscriptionCreatedResponse {
+  id: UUID;
+  agent_id: UUID;
+  endpoint_url: string;
+  event_types: string[];
+  is_active: boolean;
+  secret: string;
+  created_at: string;
+}
+
+export interface WebhookSecretRotatedResponse {
+  id: UUID;
+  secret: string;
+  rotated_at: string;
+}
+
+export interface CreateWebhookRequest {
+  endpoint_url: string;
+  event_types?: string[];
+  is_active?: boolean;
+}
+
+export interface UpdateWebhookRequest {
+  endpoint_url?: string;
+  event_types?: string[];
+  is_active?: boolean;
+}

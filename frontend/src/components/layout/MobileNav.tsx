@@ -7,6 +7,9 @@ import {
   LayoutDashboard,
   Rss,
   Bell,
+  Network,
+  BarChart3,
+  Sliders,
   Settings,
   X,
   Layers,
@@ -106,25 +109,100 @@ export function MobileNav({ isOpen, onClose, agent }: MobileNavProps) {
               )}
             </Link>
 
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-[#A3B5AC]/60 cursor-not-allowed min-h-[44px]">
+            <Link
+              href="/notifications"
+              onClick={onClose}
+              className={cn(
+                "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
+                pathname === "/notifications"
+                  ? "bg-white/[0.08] text-[#F4F5F1] font-semibold"
+                  : "text-[#A3B5AC] hover:text-[#F4F5F1] hover:bg-white/[0.05]"
+              )}
+            >
               <div className="flex items-center gap-2.5">
-                <Bell className="w-4 h-4" />
+                <Bell className="w-4 h-4 text-[#B8D5C7]" />
                 <span>Inbound Inbox</span>
               </div>
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/[0.04] text-[#A3B5AC]/80 border border-white/[0.08]">
-                P9.3
-              </span>
-            </div>
+              {pathname === "/notifications" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7]" />
+              )}
+            </Link>
 
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-[#A3B5AC]/60 cursor-not-allowed min-h-[44px]">
+            <Link
+              href="/partners"
+              onClick={onClose}
+              className={cn(
+                "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
+                pathname === "/partners"
+                  ? "bg-white/[0.08] text-[#F4F5F1] font-semibold"
+                  : "text-[#A3B5AC] hover:text-[#F4F5F1] hover:bg-white/[0.05]"
+              )}
+            >
               <div className="flex items-center gap-2.5">
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
+                <Network className="w-4 h-4 text-[#B8D5C7]" />
+                <span>Partner Synergy</span>
               </div>
-              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/[0.04] text-[#A3B5AC]/80 border border-white/[0.08]">
-                P9.3
-              </span>
-            </div>
+              {pathname === "/partners" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7]" />
+              )}
+            </Link>
+
+            <Link
+              href="/analytics"
+              onClick={onClose}
+              className={cn(
+                "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
+                pathname === "/analytics"
+                  ? "bg-white/[0.08] text-[#F4F5F1] font-semibold"
+                  : "text-[#A3B5AC] hover:text-[#F4F5F1] hover:bg-white/[0.05]"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <BarChart3 className="w-4 h-4 text-[#B8D5C7]" />
+                <span>Analytics</span>
+              </div>
+              {pathname === "/analytics" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7]" />
+              )}
+            </Link>
+
+            <Link
+              href="/preferences"
+              onClick={onClose}
+              className={cn(
+                "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
+                pathname === "/preferences"
+                  ? "bg-white/[0.08] text-[#F4F5F1] font-semibold"
+                  : "text-[#A3B5AC] hover:text-[#F4F5F1] hover:bg-white/[0.05]"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <Sliders className="w-4 h-4 text-[#B8D5C7]" />
+                <span>Preferences</span>
+              </div>
+              {pathname === "/preferences" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7]" />
+              )}
+            </Link>
+
+            <Link
+              href="/settings"
+              onClick={onClose}
+              className={cn(
+                "flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
+                pathname === "/settings"
+                  ? "bg-white/[0.08] text-[#F4F5F1] font-semibold"
+                  : "text-[#A3B5AC] hover:text-[#F4F5F1] hover:bg-white/[0.05]"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <Settings className="w-4 h-4 text-[#B8D5C7]" />
+                <span>Settings & Webhooks</span>
+              </div>
+              {pathname === "/settings" && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#B8D5C7]" />
+              )}
+            </Link>
           </div>
         </div>
 
@@ -176,15 +254,27 @@ export function MobileNav({ isOpen, onClose, agent }: MobileNavProps) {
           <span>Feed</span>
         </Link>
 
-        <div className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] py-1 px-3 text-xs font-medium text-[#A3B5AC]/50 cursor-not-allowed">
+        <Link
+          href="/notifications"
+          className={cn(
+            "flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] py-1 px-3 text-xs font-medium transition-colors",
+            pathname === "/notifications" ? "text-[#B8D5C7] font-semibold" : "text-[#A3B5AC] hover:text-[#F4F5F1]"
+          )}
+        >
           <Bell className="w-5 h-5" />
           <span>Inbox</span>
-        </div>
+        </Link>
 
-        <div className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] py-1 px-3 text-xs font-medium text-[#A3B5AC]/50 cursor-not-allowed">
+        <Link
+          href="/settings"
+          className={cn(
+            "flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] py-1 px-3 text-xs font-medium transition-colors",
+            pathname === "/settings" ? "text-[#B8D5C7] font-semibold" : "text-[#A3B5AC] hover:text-[#F4F5F1]"
+          )}
+        >
           <Settings className="w-5 h-5" />
           <span>Settings</span>
-        </div>
+        </Link>
       </nav>
     </>
   );

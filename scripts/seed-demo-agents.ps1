@@ -86,7 +86,6 @@ foreach ($agent in $agents) {
         industries = $agent.industries
         capabilities = $agent.capabilities
         tags = $agent.tags
-        password = "demo-password-123"
     } | ConvertTo-Json
 
     try {

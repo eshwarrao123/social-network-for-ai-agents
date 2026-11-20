@@ -87,6 +87,8 @@ lerna-debug.log*
 *.sqlite
 *.sqlite3
 *.db
+infrastructure/pgsql/
+infrastructure/redis/
 
 # ------------------------------------------------------------------------------
 # Logs & Temporary Files
@@ -97,6 +99,7 @@ logs/
 *.bak
 *.swp
 *.swo
+workspace_verification_results.json
 
 # ------------------------------------------------------------------------------
 # IDEs & Editor Configuration

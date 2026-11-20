@@ -675,6 +675,92 @@ async def test_pending_message_recovery_fallback_xclaim():
 
 
 @pytest.mark.unit
+async def test_pending_message_recovery_fallback_time_since_delivered():
+    """P10.1.2: Verifies fallback handles redis-py native 'time_since_delivered' key correctly."""
+    from app.workers.base_worker import BaseWorker
+
+    processed_ids = []
+
+    class MockWorker(BaseWorker):
+        stream = "posts:embed"
+        group = "embed-workers"
+        consumer_name = "test-worker-time-since-delivered"
+
+        async def handle(self, fields: dict) -> None:
+            processed_ids.append(fields.get("post_id"))
+
+    worker = MockWorker()
+    mock_redis = AsyncMock()
+    mock_log = MagicMock()
+
+    # Simulate xautoclaim failing on Redis 5
+    mock_redis.xautoclaim.side_effect = Exception("Unknown command 'XAUTOCLAIM'")
+
+    # Mock xpending_range with real redis-py structure (time_since_delivered)
+    # Threshold is worker.claim_min_idle_ms (120,000 ms)
+    mock_redis.xpending_range.return_value = [
+        {"message_id": "idle-msg-1", "consumer": "c-crashed", "time_since_delivered": 150000, "times_delivered": 2},
+        {"message_id": "active-msg-2", "consumer": "c-healthy", "time_since_delivered": 15000, "times_delivered": 1},
+        {"message_id": "boundary-msg-3", "consumer": "c-crashed", "time_since_delivered": 120000, "times_delivered": 1},
+    ]
+
+    mock_redis.xclaim.return_value = [
+        ("idle-msg-1", {"post_id": "post-1", "_retry_count": "0"}),
+        ("boundary-msg-3", {"post_id": "post-3", "_retry_count": "0"}),
+    ]
+
+    claimed = await worker._claim_and_process_pending(mock_redis, "posts:embed", mock_log)
+
+    assert claimed == 2
+    assert processed_ids == ["post-1", "post-3"]
+
+    # Verify strictly eligible candidate IDs were passed to xclaim
+    mock_redis.xclaim.assert_awaited_once_with(
+        name="posts:embed",
+        groupname="embed-workers",
+        consumername="test-worker-time-since-delivered",
+        min_idle_time=worker.claim_min_idle_ms,
+        message_ids=["idle-msg-1", "boundary-msg-3"],
+    )
+    # Verify acknowledgments
+    assert mock_redis.xack.await_count == 2
+    mock_redis.xack.assert_any_await("posts:embed", "embed-workers", "idle-msg-1")
+    mock_redis.xack.assert_any_await("posts:embed", "embed-workers", "boundary-msg-3")
+
+
+@pytest.mark.unit
+async def test_pending_message_recovery_fallback_below_threshold_not_claimed():
+    """P10.1.2: Verifies messages strictly below claim_min_idle_ms are NOT reclaimed."""
+    from app.workers.base_worker import BaseWorker
+
+    class MockWorker(BaseWorker):
+        stream = "posts:embed"
+        group = "embed-workers"
+        consumer_name = "test-worker-idle-check"
+
+        async def handle(self, fields: dict) -> None:
+            pass
+
+    worker = MockWorker()
+    mock_redis = AsyncMock()
+    mock_log = MagicMock()
+
+    mock_redis.xautoclaim.side_effect = Exception("Unknown command 'XAUTOCLAIM'")
+
+    # All pending entries are active / below threshold (120,000 ms)
+    mock_redis.xpending_range.return_value = [
+        {"message_id": "active-1", "consumer": "c-1", "time_since_delivered": 119999, "times_delivered": 1},
+        {"message_id": "active-2", "consumer": "c-2", "idle": 50000, "times_delivered": 1},
+    ]
+
+    claimed = await worker._claim_and_process_pending(mock_redis, "posts:embed", mock_log)
+
+    assert claimed == 0
+    mock_redis.xclaim.assert_not_awaited()
+    mock_redis.xack.assert_not_awaited()
+
+
+@pytest.mark.unit
 async def test_agent_duplicate_event_handling_idempotency():
     """P3.1-3: Verifies duplicate event for already completed Agent is skipped idempotently."""
     agent = make_mock_agent()

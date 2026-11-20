@@ -109,11 +109,11 @@ class BaseWorker(abc.ABC):
                     count=self.claim_batch_size,
                 )
                 if pending_entries:
-                    candidate_ids = [
-                        p["message_id"]
-                        for p in pending_entries
-                        if p.get("idle", 0) >= self.claim_min_idle_ms
-                    ]
+                    candidate_ids = []
+                    for p in pending_entries:
+                        idle_ms = p.get("idle", p.get("time_since_delivered", 0))
+                        if idle_ms >= self.claim_min_idle_ms:
+                            candidate_ids.append(p["message_id"])
                     if candidate_ids:
                         claimed = await redis.xclaim(
                             name=stream_name,

@@ -398,7 +398,14 @@ When a live PostgreSQL instance with `pgvector` is available at `DATABASE_TEST_U
 ```
 
 *(If PostgreSQL is offline, integration tests cleanly skip with diagnostic explanations rather than failing).*
+### Verification Commands
+```powershell
+# Python bytecode compilation check
+& ".\backend\.venv\Scripts\python.exe" -m compileall -q backend\app backend\tests
 
+# Dependency consistency verification
+& ".\backend\.venv\Scripts\python.exe" -m pip check
+```
 
 ---
 
